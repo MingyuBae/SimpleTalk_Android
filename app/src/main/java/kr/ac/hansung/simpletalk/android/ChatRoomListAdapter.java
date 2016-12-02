@@ -11,6 +11,8 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -19,6 +21,7 @@ import java.util.Map;
 
 import kr.ac.hansung.simpletalk.android.chatroom.ChatRoomClientVO;
 import kr.ac.hansung.simpletalk.simpletalk.R;
+import kr.ac.hansung.simpletalk.transformVO.MessageVO;
 import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 
 /**
@@ -70,10 +73,20 @@ public class ChatRoomListAdapter extends ArrayAdapter<ChatRoomClientVO> {
             convertView = inflater.inflate(R.layout.listview_item_chatroom, parent, false);
         }
         TextView chatRoomName = (TextView) convertView.findViewById(R.id.chatroom_name);
+        TextView chatRoomLastMsg = (TextView) convertView.findViewById(R.id.chatroom_lastMsg);
 
         ChatRoomClientVO chatRoomData = chatRoomClientList.get(position);
 
         chatRoomName.setText(chatRoomData.getRoomName() + "(RoomId: " + chatRoomData.getChatRoomId() + ")");
+        List<MessageVO> messageList = chatRoomData.getMessageList();
+        String lastMsg = "";
+        if(messageList.size() > 0){
+            lastMsg = messageList.get(messageList.size() - 1).getData();
+        } else {
+            lastMsg = "채팅내용 없음";
+        }
+
+        chatRoomLastMsg.setText(lastMsg);
 
         return convertView;
     }

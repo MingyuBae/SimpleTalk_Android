@@ -68,6 +68,7 @@ public class ChatService extends Thread {
                         if(roomData.getChatRoomId() == 0){
                             mappingUserProfileMap((LinkedList<UserProfileVO>) msgData.getObject());
                         }
+                        roomData.addMessageList(msgData);
                         break;
 
                     case MessageVO.MSG_TYPE_EXIT_CHATROOM_USER:

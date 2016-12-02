@@ -52,6 +52,9 @@ public class MainActivity extends AppCompatActivity
                 switch (msgData.getType()) {
                     case MessageVO.MSG_TYPE_TEXT:
                         // TODO 채팅방 리스트에 마지막 메시지가 출력되도록 처리해야 됨
+                        chatRoomAdapter.clear();
+                        chatRoomAdapter.addAll(chatService.getChatRoomMap().values());
+                        chatRoomAdapter.notifyDataSetChanged();
                         break;
                     case MessageVO.MSG_TYPE_CHANGE_PROFILE:
                     case MessageVO.MSG_TYPE_INIT_PROFILE:

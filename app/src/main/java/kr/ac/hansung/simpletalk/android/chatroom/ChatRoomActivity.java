@@ -3,6 +3,7 @@ package kr.ac.hansung.simpletalk.android.chatroom;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -23,7 +24,8 @@ public class ChatRoomActivity extends AppCompatActivity {
     Integer chatRoomId;
     ChatService chatService;
     ChatArrayAdapter chatArrayAdapter;
-    Map<Integer, UserProfileVO> userProfileMap;
+    ChatRoomClientVO chatRoomData;
+    //Map<Integer, UserProfileVO> userProfileMap;
 
     private Handler serviceHandler = new Handler(){
         public void handleMessage(android.os.Message msg) {
@@ -36,23 +38,10 @@ public class ChatRoomActivity extends AppCompatActivity {
                                     msgData.getData()));
                             break;
                         case MessageVO.MSG_TYPE_ADD_CHATROOM_USER:
-//                            String enterUserNameStrng = "";
-//                            for(String userIdString: msgData.getData().split(MessageVO.MSG_SPLIT_CHAR)){
-//                                try {
-//                                    enterUserNameStrng += userProfileMap.get(Integer.parseInt(userIdString)).getName() + " ";
-//                                } catch (NumberFormatException e) {}
-//                            }
-
                             chatArrayAdapter.add(new ChatMessage(false, msgData.getData() + " 사용자 입장"));
                             break;
 
                         case MessageVO.MSG_TYPE_EXIT_CHATROOM_USER:
-//                            String exitUserNameString = "";
-//                            for(String userIdString: msgData.getData().split(MessageVO.MSG_SPLIT_CHAR)){
-//                                try {
-//                                    exitUserNameString += userProfileMap.get(Integer.parseInt(userIdString)).getName() + " ";
-//                                } catch (NumberFormatException e) {}
-//                            }
 
                             chatArrayAdapter.add(new ChatMessage(false,msgData.getData() + " 사용자 퇴장"));
                             break;
@@ -83,7 +72,12 @@ public class ChatRoomActivity extends AppCompatActivity {
 
         chatService = ChatService.getInstance();
         chatService.setNowActivityHandler(serviceHandler);
-        userProfileMap = chatService.getUserProfileMap();
+        chatRoomData = chatService.getChatRoomMap().get(chatRoomId);
+
+        for(MessageVO message: chatRoomData.getMessageList()){
+            chatArrayAdapter.add(new ChatMessage(chatService.getMyProfile().getId().equals(message.getSenderId()),
+                    message.getData()));
+        }
 
         Button sendBtn = (Button)findViewById(R.id.sendBtn);
         sendBtn.setOnClickListener(new View.OnClickListener() {
