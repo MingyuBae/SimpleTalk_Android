@@ -1,0 +1,108 @@
+package kr.ac.hansung.simpletalk.android.chatroom;
+
+import android.app.ActionBar;
+import android.content.Intent;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.LinkedList;
+import java.util.Map;
+
+import kr.ac.hansung.simpletalk.android.ChatService;
+import kr.ac.hansung.simpletalk.simpletalk.R;
+import kr.ac.hansung.simpletalk.transformVO.MessageVO;
+import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
+
+public class ChatRoomActivity extends AppCompatActivity {
+    Integer chatRoomId;
+    ChatService chatService;
+    ChatArrayAdapter chatArrayAdapter;
+    Map<Integer, UserProfileVO> userProfileMap;
+
+    private Handler serviceHandler = new Handler(){
+        public void handleMessage(android.os.Message msg) {
+            MessageVO msgData = (MessageVO)msg.getData().getSerializable("msg");
+            if(msgData != null) {
+                if(msgData.getRoomId() != null && chatRoomId.equals(msgData.getRoomId())) {
+                    switch (msgData.getType()) {
+                        case MessageVO.MSG_TYPE_TEXT:
+                            chatArrayAdapter.add(new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()),
+                                    msgData.getData()));
+                            break;
+                        case MessageVO.MSG_TYPE_ADD_CHATROOM_USER:
+//                            String enterUserNameStrng = "";
+//                            for(String userIdString: msgData.getData().split(MessageVO.MSG_SPLIT_CHAR)){
+//                                try {
+//                                    enterUserNameStrng += userProfileMap.get(Integer.parseInt(userIdString)).getName() + " ";
+//                                } catch (NumberFormatException e) {}
+//                            }
+
+                            chatArrayAdapter.add(new ChatMessage(false, msgData.getData() + " 사용자 입장"));
+                            break;
+
+                        case MessageVO.MSG_TYPE_EXIT_CHATROOM_USER:
+//                            String exitUserNameString = "";
+//                            for(String userIdString: msgData.getData().split(MessageVO.MSG_SPLIT_CHAR)){
+//                                try {
+//                                    exitUserNameString += userProfileMap.get(Integer.parseInt(userIdString)).getName() + " ";
+//                                } catch (NumberFormatException e) {}
+//                            }
+
+                            chatArrayAdapter.add(new ChatMessage(false,msgData.getData() + " 사용자 퇴장"));
+                            break;
+                    }
+                }
+            }
+
+            //chat_list.append(r_msg + "\n");
+            //if(!m.getId().equals(login_id))
+            //if (!r_msg.contains(login_id))
+            //   newNotification(r_msg);			// 알림기능 (알림바에 알림 추가)
+        }
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_chat_room);
+
+        //getActionBar().setTitle("Hello world App");
+        Intent intent = getIntent();
+
+        chatRoomId = intent.getIntExtra("roomId", -1);
+
+        ListView listView = (ListView) findViewById(R.id.chatList);
+        chatArrayAdapter = new ChatArrayAdapter(getApplicationContext(), R.layout.activity_chat_singlemessage);
+        listView.setAdapter(chatArrayAdapter);
+
+        chatService = ChatService.getInstance();
+        chatService.setNowActivityHandler(serviceHandler);
+        userProfileMap = chatService.getUserProfileMap();
+
+        Button sendBtn = (Button)findViewById(R.id.sendBtn);
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final EditText editText = (EditText)findViewById(R.id.chatEditText);
+
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            chatService.sendTextMsg(chatRoomId, editText.getText().toString());
+                        }catch (Exception e) {e.printStackTrace();}
+                    }
+                });
+                t.start();
+
+                editText.setText("");
+            }
+        });
+    }
+}
