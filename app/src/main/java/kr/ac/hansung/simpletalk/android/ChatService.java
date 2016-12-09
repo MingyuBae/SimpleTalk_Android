@@ -29,7 +29,7 @@ public class ChatService extends Thread {
     private Map<Integer, ChatRoomClientVO> chatRoomMap = Collections.synchronizedMap(new HashMap<Integer, ChatRoomClientVO>());
 
     private Handler nowActivityHandler;
-    private String ip = "223.194.154.228"; //"223.194.157.33"; // IP
+    private String ip = "223.194.154.77"; //"223.194.157.33"; // IP
     private int port = 30000; // PORT번호
 
     private Handler socketHandler = new Handler(){
@@ -68,6 +68,13 @@ public class ChatService extends Thread {
                         if(roomData.getChatRoomId() == 0){
                             mappingUserProfileMap((LinkedList<UserProfileVO>) msgData.getObject());
                         }
+                        String addUserNameString = "";
+                        String addUserIdStringArray[] = msgData.getData().split(MessageVO.MSG_SPLIT_CHAR);
+
+                        for(String addUserId: addUserIdStringArray){
+                            addUserNameString = userProfileMap.get(Integer.parseInt(addUserId)).getName() + " ";
+                        }
+                        msgData.setData(addUserNameString + "입장");
                         roomData.addMessageList(msgData);
                         break;
 
@@ -76,6 +83,14 @@ public class ChatService extends Thread {
                         if(chatRoomData == null){
                             Log.w("exitRoom", "접속하지 않은 채팅방의 알림 수신! - roomId: " + msgData.getRoomId());
                         }
+
+                        String exitUserNameString = "";
+                        String exitUserIdStringArray[] = msgData.getData().split(MessageVO.MSG_SPLIT_CHAR);
+
+                        for(String exitUserId: exitUserIdStringArray){
+                            exitUserNameString = userProfileMap.get(Integer.parseInt(exitUserId)).getName() + " ";
+                        }
+                        msgData.setData(exitUserNameString + "퇴장");
 
                         if(msgData.getRoomId() == 0){
                             mappingUserProfileMap((LinkedList<UserProfileVO>) msgData.getObject());
@@ -109,7 +124,7 @@ public class ChatService extends Thread {
         }
     };
 
-    public static ChatService getInstance(){
+    public synchronized  static ChatService getInstance(){
         if(instance == null){
             instance = new ChatService();
         }
@@ -136,7 +151,7 @@ public class ChatService extends Thread {
     }
 
     public boolean makeRoom(String roomName, String enterUserIdString){
-        String userIdStringArray[] = enterUserIdString.split(" ");
+        String userIdStringArray[] = enterUserIdString.split(MessageVO.MSG_SPLIT_CHAR);
         int enterUserIdArray[] = new int[enterUserIdString.length()];
 
         for(int i=0; i<userIdStringArray.length; i++){

@@ -15,6 +15,8 @@ public class MessageVO implements Serializable{
 	public static final String MSG_TYPE_INIT_PROFILE ="INIT_PROFILE";
 	public static final String MSG_TYPE_ADD_CHATROOM_USER = "ADD_CHATROOM_USER";
 
+	public static final String MSG_TYPE_INFO = "INFO";
+
 	public static final String MSG_SPLIT_CHAR = ";";
 	public static final String MSG_SUCCESS = "SUCCESS";
 	public static final String MSG_ERROR = "ERROR";
@@ -61,4 +63,5 @@ public class MessageVO implements Serializable{
 		return "MessageVO [senderId=" + senderId + ", type=" + type + ", roomId=" + roomId + ", data=" + data
 				+ ", object=" + object + "]";
 	}
+
 }

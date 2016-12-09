@@ -6,7 +6,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -25,6 +27,8 @@ public class ChatRoomActivity extends AppCompatActivity {
     ChatService chatService;
     ChatArrayAdapter chatArrayAdapter;
     ChatRoomClientVO chatRoomData;
+    EditText editText;
+    Button sendBtn;
     //Map<Integer, UserProfileVO> userProfileMap;
 
     private Handler serviceHandler = new Handler(){
@@ -38,12 +42,8 @@ public class ChatRoomActivity extends AppCompatActivity {
                                     msgData.getData()));
                             break;
                         case MessageVO.MSG_TYPE_ADD_CHATROOM_USER:
-                            chatArrayAdapter.add(new ChatMessage(false, msgData.getData() + " 사용자 입장"));
-                            break;
-
                         case MessageVO.MSG_TYPE_EXIT_CHATROOM_USER:
-
-                            chatArrayAdapter.add(new ChatMessage(false,msgData.getData() + " 사용자 퇴장"));
+                            chatArrayAdapter.add(new ChatMessage(false, msgData.getData()));
                             break;
                     }
                 }
@@ -79,24 +79,40 @@ public class ChatRoomActivity extends AppCompatActivity {
                     message.getData()));
         }
 
-        Button sendBtn = (Button)findViewById(R.id.sendBtn);
+        editText = (EditText)findViewById(R.id.chatEditText);
+        sendBtn = (Button)findViewById(R.id.sendBtn);
+
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                switch (actionId){
+                    case EditorInfo.IME_ACTION_SEND:
+                        sendMessage();
+                        return true;
+                }
+                return false;
+            }
+        });
+
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final EditText editText = (EditText)findViewById(R.id.chatEditText);
-
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            chatService.sendTextMsg(chatRoomId, editText.getText().toString());
-                        }catch (Exception e) {e.printStackTrace();}
-                    }
-                });
-                t.start();
-
-                editText.setText("");
+                sendMessage();
             }
         });
+    }
+
+    private void sendMessage(){
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    chatService.sendTextMsg(chatRoomId, editText.getText().toString());
+                }catch (Exception e) {e.printStackTrace();}
+            }
+        });
+        t.start();
+
+        editText.setText("");
     }
 }

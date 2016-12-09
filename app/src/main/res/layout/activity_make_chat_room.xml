@@ -16,27 +16,25 @@
         android:inputType="textPersonName"
         android:ems="10"
         android:id="@+id/addChatRoomName"
-        android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/addChatRoomUserId"
-        android:layout_alignStart="@+id/addChatRoomUserId" />
+        android:layout_alignParentTop="true" />
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:id="@+id/addChatRoomUserId"
-        android:layout_marginTop="68dp"
-        android:layout_alignParentTop="true"
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/addChatRoomBtn"
         android:layout_centerHorizontal="true"
-        android:layout_height="40dp" />
+        android:choiceMode="multipleChoice"
+        android:id="@+id/userListView" />
 
     <Button
         android:text="생성"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/addChatRoomUserId"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="39dp"
-        android:id="@+id/addChatRoomBtn" />
+        android:id="@+id/addChatRoomBtn"
+        android:choiceMode="multipleChoice"
+        android:layout_alignBaseline="@+id/addChatRoomName"
+        android:layout_alignBottom="@+id/addChatRoomName"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
