@@ -20,6 +20,8 @@ public class UserListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_list);
 
+        getSupportActionBar().setTitle("현재 접속자");
+
         chatService = ChatService.getInstance();
 
         Map<Integer, UserProfileVO> userProfileMap = chatService.getUserProfileMap();

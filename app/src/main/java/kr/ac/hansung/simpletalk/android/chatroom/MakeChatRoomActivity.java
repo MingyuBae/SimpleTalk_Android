@@ -30,6 +30,8 @@ public class MakeChatRoomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_chat_room);
 
+        getSupportActionBar().setTitle("채팅방 생성");
+
         ChatService chatService = ChatService.getInstance();
         userProfiles = new LinkedList(chatService.getUserProfileMap().values());
 
@@ -59,23 +61,7 @@ public class MakeChatRoomActivity extends AppCompatActivity {
                                                                     + MessageVO.MSG_SPLIT_CHAR;
                     }
 
-                    final String finalUserIdListString = userIdListString;
-                    Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                ChatService.getInstance().makeRoom(addChatRoomName.getText().toString(),
-                                                                    finalUserIdListString);
-                            }catch (Exception e) {e.printStackTrace();}
-                        }
-                    });
-
-                    try {
-                        t.start();
-                        t.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    ChatService.getInstance().makeRoom(addChatRoomName.getText().toString(), userIdListString);
 
                     finish();
                 } else {

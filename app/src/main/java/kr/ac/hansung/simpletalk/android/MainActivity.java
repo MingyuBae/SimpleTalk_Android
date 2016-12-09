@@ -33,6 +33,7 @@ import kr.ac.hansung.simpletalk.android.chatroom.ChatMessage;
 import kr.ac.hansung.simpletalk.android.chatroom.ChatRoomActivity;
 import kr.ac.hansung.simpletalk.android.chatroom.ChatRoomClientVO;
 import kr.ac.hansung.simpletalk.android.chatroom.MakeChatRoomActivity;
+import kr.ac.hansung.simpletalk.android.setting.ProfileSettingActivity;
 import kr.ac.hansung.simpletalk.android.userlist.UserListActivity;
 import kr.ac.hansung.simpletalk.android.userlist.UserListAdapter;
 import kr.ac.hansung.simpletalk.simpletalk.R;
@@ -91,8 +92,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        toolbar.setTitle("채팅방 목록");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity
 
         chatService = ChatService.getInstance();
         chatService.setNowActivityHandler(serviceHandler);
-        if(! chatService.isAlive()){
+        if(! chatService.isDaemon()){
             chatService.run();
         }
 
@@ -146,6 +148,16 @@ public class MainActivity extends AppCompatActivity
         chatRoomAdapter.clear();
         chatRoomAdapter.addAll(chatService.getChatRoomMap().values());
         chatRoomAdapter.notifyDataSetChanged();
+
+        TextView userName = (TextView) findViewById(R.id.userName);
+        TextView userStateMsg = (TextView) findViewById(R.id.userStateMsg);
+
+        UserProfileVO profile = chatService.getMyProfile();
+
+        if(profile != null) {
+            userName.setText(profile.getName() + "(id: " + profile.getId() + ")");
+            userStateMsg.setText(profile.getStateMsg());
+        }
     }
 
     @Override
@@ -189,16 +201,9 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_userlist) {
             Intent intent = new Intent(this, UserListActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_profile_setting) {
+            Intent intent = new Intent(this, ProfileSettingActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

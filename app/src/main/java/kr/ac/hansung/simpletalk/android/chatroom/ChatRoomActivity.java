@@ -61,7 +61,6 @@ public class ChatRoomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_room);
 
-        //getActionBar().setTitle("Hello world App");
         Intent intent = getIntent();
 
         chatRoomId = intent.getIntExtra("roomId", -1);
@@ -100,18 +99,12 @@ public class ChatRoomActivity extends AppCompatActivity {
                 sendMessage();
             }
         });
+
+        getSupportActionBar().setTitle(chatRoomData.getRoomName());
     }
 
     private void sendMessage(){
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    chatService.sendTextMsg(chatRoomId, editText.getText().toString());
-                }catch (Exception e) {e.printStackTrace();}
-            }
-        });
-        t.start();
+        chatService.sendTextMsg(chatRoomId, editText.getText().toString());
 
         editText.setText("");
     }

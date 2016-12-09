@@ -31,6 +31,7 @@ public class ChatService extends Thread {
     private Handler nowActivityHandler;
     private String ip = "223.194.154.77"; //"223.194.157.33"; // IP
     private int port = 30000; // PORT번호
+    private boolean runable = false;
 
     private Handler socketHandler = new Handler(){
         public void handleMessage(android.os.Message msg) {
@@ -47,9 +48,11 @@ public class ChatService extends Thread {
                     case MessageVO.MSG_TYPE_INIT_PROFILE:
                         // TODO 내 정보일때만 프로필 업데이트 처리 필요 + 엑티비티에 업데이트 된것 알려줄것
                         Boolean isInit = (Boolean) msg.getData().getSerializable("init");
-                        UserProfileVO getProfile = ((UserProfileVO)msgData.getObject());
-                        if(MessageVO.MSG_TYPE_INIT_PROFILE.equals(msgData.getType()) || (myProfile.getId() == getProfile.getId())){
-                            myProfile = getProfile;
+                        UserProfileVO chagedUserProfile = ((UserProfileVO)msgData.getObject());
+                        if(MessageVO.MSG_TYPE_INIT_PROFILE.equals(msgData.getType()) || (myProfile.getId() == chagedUserProfile.getId())){
+                            myProfile = chagedUserProfile;
+                        } else {
+                            userProfileMap.put(msgData.getSenderId(), chagedUserProfile);
                         }
                         break;
 
@@ -95,6 +98,7 @@ public class ChatService extends Thread {
                         if(msgData.getRoomId() == 0){
                             mappingUserProfileMap((LinkedList<UserProfileVO>) msgData.getObject());
                         }
+                        chatRoomData.addMessageList(msgData);
                         break;
                     case MessageVO.MSG_TYPE_MAKEROOM:
                         ChatRoomClientVO newRoomData = new ChatRoomClientVO();
@@ -135,38 +139,62 @@ public class ChatService extends Thread {
 
     @Override
     public void run(){
-        socketChatThread = new SocketChatThread(ip, port);
-        socketChatThread.setHandler(socketHandler);
-        socketChatThread.start();
+        socketChatThread = SocketChatThread.getInstence();
+        if(! socketChatThread.isAlive()){
+            socketChatThread.setNetworkSetting(ip, port);
+            socketChatThread.setHandler(socketHandler);
+            socketChatThread.start();
+        }
     }
 
-    public boolean sendTextMsg(int chatRoomId, String sendText){
-        try {
-            socketChatThread.sendTextMsg(chatRoomId, myProfile.getId(), sendText);
-        }catch (IOException e){
-            Log.w("network", "메시지 전송 실패 - 네트워크 오류 (chatRoomId: " + chatRoomId + ", sendText: " + sendText + ")");
-            return false;
-        }
-        return true;
+    public void sendTextMsg(final int chatRoomId, final String sendText){
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                try {
+                    socketChatThread.sendTextMsg(chatRoomId, myProfile.getId(), sendText);
+                } catch (IOException e) {
+                    Log.w("network", "메시지 전송 실패 - 네트워크 오류 (chatRoomId: " + chatRoomId + ", sendText: " + sendText + ")");
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+        return;
     }
 
-    public boolean makeRoom(String roomName, String enterUserIdString){
-        String userIdStringArray[] = enterUserIdString.split(MessageVO.MSG_SPLIT_CHAR);
-        int enterUserIdArray[] = new int[enterUserIdString.length()];
+    public void makeRoom(final String roomName, final String enterUserIdString){
 
-        for(int i=0; i<userIdStringArray.length; i++){
-            enterUserIdArray[i] = Integer.parseInt(userIdStringArray[i]);
-        }
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                try {
+                    socketChatThread.makeRoom(roomName, enterUserIdString);
+                } catch (IOException | ClassNotFoundException e) {
+                    Log.w("makeChatRoom", "실패 (roomName: " + roomName + ", enterUserIdString: "
+                            + enterUserIdString + ")");
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
 
-        try{
-            socketChatThread.makeRoom(roomName, enterUserIdArray);
-        } catch (ClassNotFoundException| IOException e) {
-            e.printStackTrace();
-            Log.w("makeChatRoom", "실패 (roomName: " + roomName + ", enterUserIdString: "
-                    + enterUserIdString + ")");
-            return false;
-        }
+        return;
+    }
 
+    public boolean changeMyProfile(final UserProfileVO userProfileVO){
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                try {
+                    socketChatThread.sendMsg(MessageVO.MSG_TYPE_CHANGE_PROFILE, myProfile.getId(), 0, "", myProfile);
+                } catch (IOException e) {
+                    Log.w("network", "프로필 수정 실패 - 네트워크 오류 (userProfileVO: " + userProfileVO + ")");
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
 
         return true;
     }

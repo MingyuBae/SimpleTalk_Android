@@ -11,6 +11,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.Socket;
 
@@ -22,6 +23,7 @@ import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
  */
 
 public class SocketChatThread extends Thread {
+    private static SocketChatThread instence;
     private Handler handler;
     private UserProfileVO userData;
     private MessageVO lastMsg;
@@ -35,12 +37,13 @@ public class SocketChatThread extends Thread {
     private String ip = "223.194.157.33"; // IP
     private int port = 30000; // PORT번호
 
-    public SocketChatThread(){
-    }
+    private SocketChatThread(){}
 
-    public SocketChatThread(String ip, int port){
-        this.ip = ip;
-        this.port = port;
+    public synchronized static SocketChatThread getInstence(){
+        if(instence == null){
+            instence = new SocketChatThread();
+        }
+        return instence;
     }
 
     public void run(){
@@ -75,6 +78,66 @@ public class SocketChatThread extends Thread {
         }
         Log.i("network", "마지막");
         onStop();
+    }
+
+
+    public void makeRoom(String roomName, String enterUserIdListString) throws IOException, ClassNotFoundException {
+        MessageVO msg = new MessageVO();
+        msg.setType(MessageVO.MSG_TYPE_MAKEROOM);
+        msg.setData(roomName);
+        msg.setObject(enterUserIdListString);
+
+        objectOutputStream.writeObject(msg);
+
+        //MessageVO roomMakeReturnMsg = (MessageVO) objectInputStream.readObject();
+        //Log.i("network", "채팅방 생성 정보 - " + roomMakeReturnMsg.toString());
+    }
+
+    public void addChatRoomUser(int chatRoomId, int addUserIdArray[]) throws IOException {
+        String addUserIdListString = "";
+        for(int addUserId : addUserIdArray){
+            addUserIdListString += addUserId + MessageVO.MSG_SPLIT_CHAR;
+        }
+        MessageVO msg = new MessageVO();
+        msg.setRoomId(chatRoomId);
+        msg.setType(MessageVO.MSG_TYPE_ADD_CHATROOM_USER);
+        msg.setData(addUserIdListString);
+
+        objectOutputStream.writeObject(msg);
+    }
+
+    public void sendTextMsg(int chatRoomId, int myId, String sendText) throws IOException {
+        MessageVO msg2 = new MessageVO();
+        msg2.setType(MessageVO.MSG_TYPE_TEXT);
+        msg2.setData(sendText);
+        msg2.setSenderId(myId);
+        msg2.setRoomId(chatRoomId);
+
+        objectOutputStream.writeObject(msg2);
+    }
+
+    public void sendMsg(String type, int senderId, int chatRoomId, String data, Serializable object) throws IOException {
+        MessageVO msg2 = new MessageVO();
+        msg2.setType(type);
+        msg2.setSenderId(senderId);
+        msg2.setRoomId(chatRoomId);
+        msg2.setData(data);
+        msg2.setObject(object);
+
+        objectOutputStream.writeObject(msg2);
+    }
+
+    public void setNetworkSetting(String ip, int port){
+        this.ip = ip;
+        this.port = port;
+    }
+
+    public UserProfileVO getUserProfile(){
+        return userData;
+    }
+
+    public void setUserProfile(UserProfileVO userData){
+        this.userData = userData;
     }
 
     public void setHandler(Handler handler){
@@ -133,48 +196,6 @@ public class SocketChatThread extends Thread {
         return msgData;
     }
 
-    public void makeRoom(String roomName, int enterUserIdArray[]) throws IOException, ClassNotFoundException {
-        String enterUserIdListString = "";
-        for(int enterUserId : enterUserIdArray){
-            enterUserIdListString += enterUserId + MessageVO.MSG_SPLIT_CHAR;
-        }
-
-        MessageVO msg = new MessageVO();
-        msg.setType(MessageVO.MSG_TYPE_MAKEROOM);
-        msg.setData(roomName);
-        msg.setObject(enterUserIdListString);
-
-        objectOutputStream.writeObject(msg);
-
-        //MessageVO roomMakeReturnMsg = (MessageVO) objectInputStream.readObject();
-        //Log.i("network", "채팅방 생성 정보 - " + roomMakeReturnMsg.toString());
-    }
-
-    public void addChatRoomUser(int chatRoomId, int addUserIdArray[]) throws IOException {
-        String addUserIdListString = "";
-        for(int addUserId : addUserIdArray){
-            addUserIdListString += addUserId + MessageVO.MSG_SPLIT_CHAR;
-        }
-        MessageVO msg = new MessageVO();
-        msg.setRoomId(chatRoomId);
-        msg.setType(MessageVO.MSG_TYPE_ADD_CHATROOM_USER);
-        msg.setData(addUserIdListString);
-
-        objectOutputStream.writeObject(msg);
-    }
-
-    public void sendTextMsg(int chatRoomId, int myId, String sendText) throws IOException {
-        MessageVO msg2 = new MessageVO();
-        msg2.setType(MessageVO.MSG_TYPE_TEXT);
-        msg2.setData(sendText);
-        msg2.setSenderId(myId);
-        msg2.setRoomId(chatRoomId);
-
-        objectOutputStream.writeObject(msg2);
-    }
-    public UserProfileVO getUserProfile(){
-        return userData;
-    }
     /*
     private Thread checkUpdate = new Thread() {
 

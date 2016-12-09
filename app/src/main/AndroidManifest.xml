@@ -28,6 +28,7 @@
         <activity android:name="kr.ac.hansung.simpletalk.android.userlist.UserListActivity" />
         <activity android:name="kr.ac.hansung.simpletalk.android.chatroom.ChatRoomActivity" />
         <activity android:name="kr.ac.hansung.simpletalk.android.chatroom.MakeChatRoomActivity" />
+        <activity android:name="kr.ac.hansung.simpletalk.android.setting.ProfileSettingActivity"/>
     </application>
 
 </manifest>
