@@ -1,28 +1,61 @@
 package kr.ac.hansung.simpletalk.android.chatroom;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.vanniktech.emoji.EmojiEditText;
+import com.vanniktech.emoji.EmojiPopup;
+import com.vanniktech.emoji.emoji.Emoji;
+import com.vanniktech.emoji.listeners.OnEmojiBackspaceClickListener;
+import com.vanniktech.emoji.listeners.OnEmojiClickedListener;
+import com.vanniktech.emoji.listeners.OnEmojiPopupDismissListener;
+import com.vanniktech.emoji.listeners.OnEmojiPopupShownListener;
+import com.vanniktech.emoji.listeners.OnSoftKeyboardCloseListener;
+import com.vanniktech.emoji.listeners.OnSoftKeyboardOpenListener;
+
+import java.io.ByteArrayOutputStream;
+import java.util.UUID;
 
 import kr.ac.hansung.simpletalk.android.ChatService;
 import kr.ac.hansung.simpletalk.android.R;
 import kr.ac.hansung.simpletalk.transformVO.MessageVO;
 
 public class ChatRoomActivity extends AppCompatActivity {
-    Integer chatRoomId;
-    ChatService chatService;
-    ChatArrayAdapter chatArrayAdapter;
-    ChatRoomClientVO chatRoomData;
-    EditText editText;
-    Button sendBtn;
+    private static final int PICK_FROM_CAMERA = 1;
+    private static final int PICK_FROM_GALLERY = 2;
+
+    private Integer chatRoomId;
+    private ChatService chatService;
+    private ChatArrayAdapter chatArrayAdapter;
+    private ChatRoomClientVO chatRoomData;
+    private Button buttonSend;
+    private Button imageSend;
+    private EmojiEditText chatText;
+    private EmojiPopup emojiPopup;
+    private ImageButton emoticonSend;
+    private ViewGroup rootView;
     //Map<Integer, UserProfileVO> userProfileMap;
 
     private Handler serviceHandler = new Handler(){
@@ -62,10 +95,23 @@ public class ChatRoomActivity extends AppCompatActivity {
             chatArrayAdapter.add(chatMassgeConverter(message));
         }
 
-        editText = (EditText)findViewById(R.id.chatEditText);
-        sendBtn = (Button)findViewById(R.id.sendBtn);
+        /* UI 영역 */
+        rootView = (ViewGroup) findViewById(R.id.activity_chat_room);
+        chatText = (EmojiEditText) findViewById(R.id.chatText);
+        imageSend = (Button)findViewById(R.id.imageSend);
+        emoticonSend = (ImageButton) findViewById(R.id.emoticonSend);
+        buttonSend = (Button) findViewById(R.id.buttonSend);
 
-        editText.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+        setUpEmojiPopup();
+
+        emoticonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                emojiPopup.toggle();
+            }
+        });
+
+        chatText.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 switch (actionId){
@@ -77,10 +123,25 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
         });
 
-        sendBtn.setOnClickListener(new View.OnClickListener() {
+        imageSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage();
+                Intent intent = new Intent();
+                // Gallery 호출
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                // 잘라내기 셋팅
+                intent.putExtra("crop", "true");
+                intent.putExtra("aspectX", 0);
+                intent.putExtra("aspectY", 0);
+                intent.putExtra("outputX", 200);
+                intent.putExtra("outputY", 150);
+                try {
+                    intent.putExtra("return-data", true);
+                    startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_GALLERY);
+                } catch (ActivityNotFoundException e) {
+                    // Do nothing for now
+                }
             }
         });
 
@@ -88,27 +149,141 @@ public class ChatRoomActivity extends AppCompatActivity {
     }
 
     private void sendMessage(){
-        chatService.sendTextMsg(chatRoomId, editText.getText().toString());
+        chatService.sendTextMsg(chatRoomId, chatText.getText().toString());
 
-        editText.setText("");
+        chatText.setText("");
     }
 
     private ChatMessage chatMassgeConverter(MessageVO msgData){
         ChatMessage chatMag = null;
+
+        String userName = "(퇴장한 사용자)";
+        try {
+            userName = chatService.getUserProfileMap().get(msgData.getSenderId()).getName();
+        }catch (NullPointerException e){}
+
         switch (msgData.getType()) {
             case MessageVO.MSG_TYPE_TEXT:
-                String userName = "(퇴장한 사용자)";
-                try {
-                    userName = chatService.getUserProfileMap().get(msgData.getSenderId()).getName();
-                }catch (NullPointerException e){}
+                chatMag = new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()) ? ChatMessage.SIDE_RIGHT : ChatMessage.SIDE_LEFT,
+                    msgData.getData(), userName);
+                break;
+            case MessageVO.MSG_TYPE_IMAGE:
+                final long MAX_FILESIZE = 1024 * 1024 * 5;
+                FirebaseStorage storage = FirebaseStorage.getInstance();
+                StorageReference storageRef = storage.getReferenceFromUrl("gs://simpletalk-ce063.appspot.com");
+                StorageReference imageRef = storageRef.child(msgData.getData());
 
                 chatMag = new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()) ? ChatMessage.SIDE_RIGHT : ChatMessage.SIDE_LEFT,
-                                            msgData.getData(), userName);
+                        "이미지 로드중...", userName);
+
+                final ChatMessage finalChatMag = chatMag;
+                imageRef.getBytes(MAX_FILESIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        finalChatMag.bytes = bytes;
+                        finalChatMag.type = ChatMessage.TYPE_IMAGE;
+
+                        chatArrayAdapter.notifyDataSetChanged();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        finalChatMag.message = "이미지 로드 실패";
+                        chatArrayAdapter.notifyDataSetChanged();
+                    }
+                });
                 break;
             default:
                 chatMag = new ChatMessage(ChatMessage.SIDE_CENTER, msgData.getData());
                 break;
         }
         return chatMag;
+    }
+
+    /**
+     * 파일, 이미지 선택 후 선택된 파일을 받는 영역
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(data == null){
+            Toast.makeText(this, "취소되었습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (requestCode == PICK_FROM_CAMERA) {
+            Bundle extras = data.getExtras();
+            if (extras != null) {
+                Bitmap photo = extras.getParcelable("data");
+                //imgview.setImageBitmap(photo);
+            }
+        }
+        if (requestCode == PICK_FROM_GALLERY) {
+            Uri fileUri = data.getData();
+            if (fileUri != null) {
+                FirebaseStorage storage = FirebaseStorage.getInstance();
+                StorageReference storageRef = storage.getReferenceFromUrl("gs://simpletalk-ce063.appspot.com");
+                StorageReference imagesRef = storageRef.child("images/" + fileUri.getLastPathSegment());
+                UploadTask uploadTask = imagesRef.putFile(fileUri);
+
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                        //Uri downloadUrl = taskSnapshot.getStorage().getPath();
+
+                        chatService.sendImageUrlMsg(chatRoomId, taskSnapshot.getStorage().getPath());
+                        Toast.makeText(getBaseContext(), "사진 업로드가 완료되었습니다.",  Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
+    }
+
+    private void setUpEmojiPopup() {
+        emojiPopup = EmojiPopup.Builder.fromRootView(rootView).setOnEmojiBackspaceClickListener(new OnEmojiBackspaceClickListener() {
+            @Override
+            public void onEmojiBackspaceClicked(final View v) {
+                Log.d("MainActivity", "Clicked on Backspace");
+            }
+        }).setOnEmojiClickedListener(new OnEmojiClickedListener() {
+            @Override
+            public void onEmojiClicked(final Emoji emoji) {
+                Log.d("MainActivity", "Clicked on emoji");
+            }
+        }).setOnEmojiPopupShownListener(new OnEmojiPopupShownListener() {
+            @Override
+            public void onEmojiPopupShown() {
+                emoticonSend.setImageResource(R.drawable.ic_keyboard_grey_500_36dp);
+            }
+        }).setOnSoftKeyboardOpenListener(new OnSoftKeyboardOpenListener() {
+            @Override
+            public void onKeyboardOpen(final int keyBoardHeight) {
+                Log.d("MainActivity", "Opened soft keyboard");
+            }
+        }).setOnEmojiPopupDismissListener(new OnEmojiPopupDismissListener() {
+            @Override
+            public void onEmojiPopupDismiss() {
+                emoticonSend.setImageResource(R.drawable.emoji_people);
+            }
+        }).setOnSoftKeyboardCloseListener(new OnSoftKeyboardCloseListener() {
+            @Override
+            public void onKeyboardClose() {
+                emojiPopup.dismiss();
+            }
+        }).build(chatText);
+
+        buttonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                sendMessage();
+            }
+        });
     }
 }

@@ -81,7 +81,13 @@ public class ChatRoomListAdapter extends ArrayAdapter<ChatRoomClientVO> {
         List<MessageVO> messageList = chatRoomData.getMessageList();
         String lastMsg = "";
         if(messageList.size() > 0){
-            lastMsg = messageList.get(messageList.size() - 1).getData();
+            MessageVO lastMsgVo = messageList.get(messageList.size() - 1);
+            if(MessageVO.MSG_TYPE_IMAGE.equals(lastMsgVo.getType())){
+                lastMsg = "이미지";
+            } else {
+                lastMsg = lastMsgVo.getData();
+            }
+
         } else {
             lastMsg = "채팅내용 없음";
         }

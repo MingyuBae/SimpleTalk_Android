@@ -29,7 +29,7 @@ public class ChatService extends Thread {
     private Map<Integer, ChatRoomClientVO> chatRoomMap = Collections.synchronizedMap(new HashMap<Integer, ChatRoomClientVO>());
 
     private Handler nowActivityHandler;
-    private String ip = "223.194.155.110"; //"223.194.157.33"; // IP
+    private String ip = "192.168.1.128"; //"223.194.157.33"; // IP
     private int port = 30000; // PORT번호
     private boolean runable = false;
 
@@ -39,6 +39,7 @@ public class ChatService extends Thread {
             if(msgData != null) {
                 switch (msgData.getType()) {
                     case MessageVO.MSG_TYPE_TEXT:
+                    case MessageVO.MSG_TYPE_IMAGE:
                         //chatArrayAdapter.add(new ChatMessage(msgData.getSenderId().equals(socketChatThread.getUserProfile().getId()), msgData.toString()));
                         ChatRoomClientVO roomData1 = chatRoomMap.get(msgData.getRoomId());
                         roomData1.addMessageList(msgData);
@@ -146,6 +147,22 @@ public class ChatService extends Thread {
                     socketChatThread.sendTextMsg(chatRoomId, myProfile.getId(), sendText);
                 } catch (IOException e) {
                     Log.w("network", "메시지 전송 실패 - 네트워크 오류 (chatRoomId: " + chatRoomId + ", sendText: " + sendText + ")");
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+        return;
+    }
+
+    public void sendImageUrlMsg(final int chatRoomId, final String sendImageUrl){
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                try {
+                    socketChatThread.sendMsg(MessageVO.MSG_TYPE_IMAGE, myProfile.getId(), chatRoomId, sendImageUrl, null);
+                } catch (IOException e) {
+                    Log.w("network", "이미지 URL 전송 실패 - 네트워크 오류 (chatRoomId: " + chatRoomId + ", sendImageUrl: " + sendImageUrl + ")");
                     e.printStackTrace();
                 }
             }

@@ -10,33 +10,63 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="kr.ac.hansung.simpletalk.android.chatroom.ChatRoomActivity">
 
+    <LinearLayout
+        android:id="@+id/form"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <Button
+            android:text="+"
+            android:layout_width="34dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageSend"
+            android:layout_alignTop="@+id/chatText"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <com.vanniktech.emoji.EmojiEditText
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:inputType="textMultiLine"
+            android:ems="10"
+            android:id="@+id/chatText"
+            android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@+id/buttonSend"
+            android:layout_weight="0.70" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="center"
+            android:src="@drawable/emoji_people"
+            android:id="@+id/emoticonSend"
+            android:layout_weight="0.25" />
+
+        <Button
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:text="Send"
+            android:id="@+id/buttonSend"
+            android:layout_alignBottom="@+id/chatText"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/chatText" />
+    </LinearLayout>
+
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/chatList"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:transcriptMode="alwaysScroll"
-        android:layout_marginBottom="85dp" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:layout_alignParentBottom="true"
+        android:dividerHeight="0px"
+        android:divider="#ffffff"
+        android:layout_above="@+id/form"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:imeOptions="actionSend"
-        android:id="@+id/chatEditText" />
+        android:layout_alignParentStart="true" />
 
-    <Button
-        android:text="전송"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:id="@+id/sendBtn" />
 </RelativeLayout>

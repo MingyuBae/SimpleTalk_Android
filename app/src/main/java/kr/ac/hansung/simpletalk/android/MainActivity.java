@@ -52,14 +52,12 @@ public class MainActivity extends AppCompatActivity
             if(msgData != null) {
                 switch (msgData.getType()) {
                     case MessageVO.MSG_TYPE_TEXT:
-                        // TODO 채팅방 리스트에 마지막 메시지가 출력되도록 처리해야 됨
                         chatRoomAdapter.clear();
                         chatRoomAdapter.addAll(chatService.getChatRoomMap().values());
                         chatRoomAdapter.notifyDataSetChanged();
                         break;
                     case MessageVO.MSG_TYPE_CHANGE_PROFILE:
                     case MessageVO.MSG_TYPE_INIT_PROFILE:
-                        // TODO 내 정보일때만 프로필 업데이트 처리 필요 + 엑티비티에 업데이트 된것 알려줄것
                         UserProfileVO profile = (UserProfileVO) msgData.getObject();
                         if(profile.getId() == chatService.getMyProfile().getId()
                                 || MessageVO.MSG_TYPE_INIT_PROFILE.equals(msgData.getType())){
@@ -73,7 +71,6 @@ public class MainActivity extends AppCompatActivity
 
                     case MessageVO.MSG_TYPE_ADD_CHATROOM_USER:
                     case MessageVO.MSG_TYPE_EXIT_CHATROOM_USER:
-                        // TODO 내가 채팅방에 초대, 탈퇴된 경우 리스트를 갱신해야 됨
                         chatRoomAdapter.clear();
                         chatRoomAdapter.addAll(chatService.getChatRoomMap().values());
                         chatRoomAdapter.notifyDataSetChanged();
@@ -213,7 +210,6 @@ public class MainActivity extends AppCompatActivity
         TextView userStateMsg = (TextView)findViewById(R.id.userStateMsg);
 
         if(userName != null && userStateMsg != null) {
-            // TODO 가끔씩 userName과 userStateMsg값이 NULL이 들어가는 경우가 있음, 수정필요
             userName.setText(userProfileData.getName() + " (userID: " + userProfileData.getId() + ")");
             userStateMsg.setText(userProfileData.getStateMsg());
         }

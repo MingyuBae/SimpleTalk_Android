@@ -20,19 +20,7 @@
             android:id="@+id/userImage"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignBottom="@+id/singleMessage" />
-
-        <TextView
-            android:id="@+id/singleMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Hello bubbles!"
-            android:textColor="@android:color/primary_text_light"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/userImage"
-            android:layout_toEndOf="@+id/userImage" />
+            android:layout_alignParentStart="true" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -42,9 +30,38 @@
             android:text="Num01"
             android:layout_weight="1"
             android:textStyle="bold"
-            android:layout_above="@+id/singleMessage"
             android:layout_toRightOf="@+id/userImage"
             android:textSize="8sp" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/contentContainer"
+            android:layout_below="@+id/name"
+            android:layout_toRightOf="@+id/name"
+            android:layout_toEndOf="@+id/name" >
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/singleMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Hello bubbles!"
+            android:textColor="@android:color/primary_text_light"
+            android:layout_below="@+id/contentContainer"
+            android:layout_toRightOf="@+id/userImage"
+            android:layout_toEndOf="@+id/userImage" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@mipmap/ic_launcher"
+            android:id="@+id/imageView"
+            android:layout_below="@+id/name"
+            android:layout_toRightOf="@+id/userImage"
+            android:layout_toEndOf="@+id/userImage" />
 
     </RelativeLayout>
 

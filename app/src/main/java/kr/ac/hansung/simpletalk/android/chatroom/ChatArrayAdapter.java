@@ -18,11 +18,7 @@ import java.util.List;
 import kr.ac.hansung.simpletalk.android.R;
 
 public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
-	private TextView chatText;
-	private TextView userName;
-	private ImageView userImage;
 	private List<ChatMessage> chatMessageList = new ArrayList<ChatMessage>();
-	private RelativeLayout singleMessageContainer;
 
 	@Override
 	public void add(ChatMessage object) {
@@ -48,32 +44,53 @@ public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
 			LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			row = inflater.inflate(R.layout.activity_chat_singlemessage, parent, false);
 		}
-		singleMessageContainer = (RelativeLayout) row.findViewById(R.id.singleMessageContainer);
+
+        ImageView imageView = (ImageView) row.findViewById(R.id.imageView);
+        TextView chatText = (TextView) row.findViewById(R.id.singleMessage);
+        TextView userName = (TextView) row.findViewById(R.id.name);
+        ImageView userImage = (ImageView)row.findViewById(R.id.userImage);
+
+        RelativeLayout singleMessageContainer = (RelativeLayout) row.findViewById(R.id.singleMessageContainer);
 		ChatMessage chatMessageObj = getItem(position);
-		chatText = (TextView) row.findViewById(R.id.singleMessage);
-		chatText.setText(chatMessageObj.message);
+
 
 		//사용자이름
-		userName = (TextView) row.findViewById(R.id.name);
 		userName.setText(chatMessageObj.userName);
 
 		//사용자 프로필사진
-		userImage = (ImageView)row.findViewById(R.id.userImage);
-		userImage.setImageResource(R.drawable.ic_menu_gallery);
+        userImage.setImageResource(R.drawable.ic_menu_gallery);
+
+        // 내용
+        View conentView;
+        if(chatMessageObj.type == ChatMessage.TYPE_IMAGE){
+            conentView = imageView;
+            imageView.setImageBitmap(decodeToBitmap(chatMessageObj.bytes));
+            imageView.setVisibility(View.VISIBLE);
+            chatText.setVisibility(View.INVISIBLE);
+        } else {
+            conentView = chatText;
+            chatText.setText(chatMessageObj.message);
+            imageView.setVisibility(View.INVISIBLE);
+            chatText.setVisibility(View.VISIBLE);
+        }
 
 		//chatText.setBackgroundResource(chatMessageObj.left ? R.drawable.bubble_b : R.drawable.bubble_a);
 		//사용자에 따라 출력 방향 다르게하기
+
+        userName.setVisibility(View.VISIBLE);
+        userImage.setVisibility(View.VISIBLE);
+
 		switch (chatMessageObj.side){
 			case ChatMessage.SIDE_LEFT:
-				chatText.setBackgroundResource(R.drawable.bubble_b);
+                conentView.setBackgroundResource(R.drawable.bubble_b);
 				singleMessageContainer.setGravity(Gravity.LEFT);
 				break;
 			case ChatMessage.SIDE_RIGHT:
-				chatText.setBackgroundResource(R.drawable.bubble_a);
+                conentView.setBackgroundResource(R.drawable.bubble_a);
 				singleMessageContainer.setGravity(Gravity.RIGHT);
 				break;
 			case ChatMessage.SIDE_CENTER:
-				chatText.setBackgroundResource(R.drawable.bubble_c);
+                conentView.setBackgroundResource(R.drawable.bubble_c);
 				chatText.setText(chatMessageObj.message);
 				singleMessageContainer.setGravity(Gravity.CENTER);
 				userName.setVisibility(View.INVISIBLE);
