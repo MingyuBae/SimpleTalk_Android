@@ -17,7 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import kr.ac.hansung.simpletalk.android.ChatService;
-import kr.ac.hansung.simpletalk.simpletalk.R;
+import kr.ac.hansung.simpletalk.android.R;
 import kr.ac.hansung.simpletalk.transformVO.MessageVO;
 import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 

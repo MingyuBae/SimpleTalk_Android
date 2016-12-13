@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import kr.ac.hansung.simpletalk.android.chatroom.ChatRoomClientVO;
-import kr.ac.hansung.simpletalk.simpletalk.R;
+import kr.ac.hansung.simpletalk.android.R;
 import kr.ac.hansung.simpletalk.transformVO.MessageVO;
 import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 

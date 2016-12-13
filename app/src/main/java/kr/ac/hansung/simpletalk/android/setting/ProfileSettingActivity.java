@@ -7,7 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import kr.ac.hansung.simpletalk.android.ChatService;
-import kr.ac.hansung.simpletalk.simpletalk.R;
+import kr.ac.hansung.simpletalk.android.R;
 import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 
 public class ProfileSettingActivity extends AppCompatActivity {

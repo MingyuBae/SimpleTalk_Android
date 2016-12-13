@@ -29,12 +29,12 @@ public class ChatService extends Thread {
     private Map<Integer, ChatRoomClientVO> chatRoomMap = Collections.synchronizedMap(new HashMap<Integer, ChatRoomClientVO>());
 
     private Handler nowActivityHandler;
-    private String ip = "223.194.154.77"; //"223.194.157.33"; // IP
+    private String ip = "223.194.155.110"; //"223.194.157.33"; // IP
     private int port = 30000; // PORT번호
     private boolean runable = false;
 
     private Handler socketHandler = new Handler(){
-        public void handleMessage(android.os.Message msg) {
+        public synchronized void handleMessage(android.os.Message msg) {
             MessageVO msgData = (MessageVO)msg.getData().getSerializable("msg");
             if(msgData != null) {
                 switch (msgData.getType()) {
@@ -46,10 +46,10 @@ public class ChatService extends Thread {
                         break;
                     case MessageVO.MSG_TYPE_CHANGE_PROFILE:
                     case MessageVO.MSG_TYPE_INIT_PROFILE:
-                        // TODO 내 정보일때만 프로필 업데이트 처리 필요 + 엑티비티에 업데이트 된것 알려줄것
                         Boolean isInit = (Boolean) msg.getData().getSerializable("init");
                         UserProfileVO chagedUserProfile = ((UserProfileVO)msgData.getObject());
                         if(MessageVO.MSG_TYPE_INIT_PROFILE.equals(msgData.getType()) || (myProfile.getId() == chagedUserProfile.getId())){
+                            /* 초기 프로필 데이터나 내 프로필일 경우 */
                             myProfile = chagedUserProfile;
                         } else {
                             userProfileMap.put(msgData.getSenderId(), chagedUserProfile);
@@ -65,7 +65,6 @@ public class ChatService extends Thread {
                             roomData.setRoomName("이름없음");
                             chatRoomMap.put(msgData.getRoomId(), roomData);
                             Log.i("enterRoom", "채팅방 접속 - roomData: " + roomData);
-                            // TODO 엑티비티에 채팅방에 접속 됬다고 통보해 줄것
                         }
                         roomData.setEnterUserProfileList((LinkedList<UserProfileVO>) msgData.getObject());
                         if(roomData.getChatRoomId() == 0){
@@ -83,17 +82,11 @@ public class ChatService extends Thread {
 
                     case MessageVO.MSG_TYPE_EXIT_CHATROOM_USER:
                         ChatRoomClientVO chatRoomData = chatRoomMap.get(msgData.getRoomId());
-                        if(chatRoomData == null){
+                        if(chatRoomData == null) {
                             Log.w("exitRoom", "접속하지 않은 채팅방의 알림 수신! - roomId: " + msgData.getRoomId());
                         }
 
-                        String exitUserNameString = "";
-                        String exitUserIdStringArray[] = msgData.getData().split(MessageVO.MSG_SPLIT_CHAR);
-
-                        for(String exitUserId: exitUserIdStringArray){
-                            exitUserNameString = userProfileMap.get(Integer.parseInt(exitUserId)).getName() + " ";
-                        }
-                        msgData.setData(exitUserNameString + "퇴장");
+                        msgData.setData( msgData.getData() + " 퇴장");
 
                         if(msgData.getRoomId() == 0){
                             mappingUserProfileMap((LinkedList<UserProfileVO>) msgData.getObject());
@@ -107,8 +100,6 @@ public class ChatService extends Thread {
                         newRoomData.setEnterUserProfileList((LinkedList<UserProfileVO>) msgData.getObject());
                         chatRoomMap.put(msgData.getRoomId(), newRoomData);
                         Log.i("enterRoom", "채팅방 생성 - newRoomData: " + newRoomData);
-                        // TODO 엑티비티에 채팅방에 접속 됬다고 통보해 줄것
-
                         break;
                 }
 

@@ -36,7 +36,7 @@ import kr.ac.hansung.simpletalk.android.chatroom.MakeChatRoomActivity;
 import kr.ac.hansung.simpletalk.android.setting.ProfileSettingActivity;
 import kr.ac.hansung.simpletalk.android.userlist.UserListActivity;
 import kr.ac.hansung.simpletalk.android.userlist.UserListAdapter;
-import kr.ac.hansung.simpletalk.simpletalk.R;
+import kr.ac.hansung.simpletalk.android.R;
 import kr.ac.hansung.simpletalk.transformVO.MessageVO;
 import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 
@@ -100,11 +100,8 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO 채팅방 생성 기능이 들어가야 됨
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-                Intent intent = new Intent(getBaseContext(), MakeChatRoomActivity.class);
-                startActivity(intent);
+            Intent intent = new Intent(getBaseContext(), MakeChatRoomActivity.class);
+            startActivity(intent);
             }
         });
 

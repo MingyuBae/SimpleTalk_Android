@@ -1,9 +1,7 @@
 package kr.ac.hansung.simpletalk.android.chatroom;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -14,13 +12,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.LinkedList;
-import java.util.Map;
-
 import kr.ac.hansung.simpletalk.android.ChatService;
-import kr.ac.hansung.simpletalk.simpletalk.R;
+import kr.ac.hansung.simpletalk.android.R;
 import kr.ac.hansung.simpletalk.transformVO.MessageVO;
-import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 
 public class ChatRoomActivity extends AppCompatActivity {
     Integer chatRoomId;
@@ -36,16 +30,7 @@ public class ChatRoomActivity extends AppCompatActivity {
             MessageVO msgData = (MessageVO)msg.getData().getSerializable("msg");
             if(msgData != null) {
                 if(msgData.getRoomId() != null && chatRoomId.equals(msgData.getRoomId())) {
-                    switch (msgData.getType()) {
-                        case MessageVO.MSG_TYPE_TEXT:
-                            chatArrayAdapter.add(new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()),
-                                    msgData.getData()));
-                            break;
-                        case MessageVO.MSG_TYPE_ADD_CHATROOM_USER:
-                        case MessageVO.MSG_TYPE_EXIT_CHATROOM_USER:
-                            chatArrayAdapter.add(new ChatMessage(false, msgData.getData()));
-                            break;
-                    }
+                    chatArrayAdapter.add(chatMassgeConverter(msgData));
                 }
             }
 
@@ -74,8 +59,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         chatRoomData = chatService.getChatRoomMap().get(chatRoomId);
 
         for(MessageVO message: chatRoomData.getMessageList()){
-            chatArrayAdapter.add(new ChatMessage(chatService.getMyProfile().getId().equals(message.getSenderId()),
-                    message.getData()));
+            chatArrayAdapter.add(chatMassgeConverter(message));
         }
 
         editText = (EditText)findViewById(R.id.chatEditText);
@@ -107,5 +91,24 @@ public class ChatRoomActivity extends AppCompatActivity {
         chatService.sendTextMsg(chatRoomId, editText.getText().toString());
 
         editText.setText("");
+    }
+
+    private ChatMessage chatMassgeConverter(MessageVO msgData){
+        ChatMessage chatMag = null;
+        switch (msgData.getType()) {
+            case MessageVO.MSG_TYPE_TEXT:
+                String userName = "(퇴장한 사용자)";
+                try {
+                    userName = chatService.getUserProfileMap().get(msgData.getSenderId()).getName();
+                }catch (NullPointerException e){}
+
+                chatMag = new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()) ? ChatMessage.SIDE_RIGHT : ChatMessage.SIDE_LEFT,
+                                            msgData.getData(), userName);
+                break;
+            default:
+                chatMag = new ChatMessage(ChatMessage.SIDE_CENTER, msgData.getData());
+                break;
+        }
+        return chatMag;
     }
 }

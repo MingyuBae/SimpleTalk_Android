@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="kr.ac.hansung.simpletalk.simpletalk">
+    package="kr.ac.hansung.simpletalk.android">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -28,7 +28,8 @@
         <activity android:name="kr.ac.hansung.simpletalk.android.userlist.UserListActivity" />
         <activity android:name="kr.ac.hansung.simpletalk.android.chatroom.ChatRoomActivity" />
         <activity android:name="kr.ac.hansung.simpletalk.android.chatroom.MakeChatRoomActivity" />
-        <activity android:name="kr.ac.hansung.simpletalk.android.setting.ProfileSettingActivity"/>
+        <activity android:name="kr.ac.hansung.simpletalk.android.setting.ProfileSettingActivity" />
+        <activity android:name="kr.ac.hansung.simpletalk.android.setting.NetworkSettingActivity"></activity>
     </application>
 
 </manifest>
