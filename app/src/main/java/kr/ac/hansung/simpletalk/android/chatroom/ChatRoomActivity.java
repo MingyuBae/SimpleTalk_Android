@@ -168,30 +168,10 @@ public class ChatRoomActivity extends AppCompatActivity {
                     msgData.getData(), userName);
                 break;
             case MessageVO.MSG_TYPE_IMAGE:
-                final long MAX_FILESIZE = 1024 * 1024 * 5;
-                FirebaseStorage storage = FirebaseStorage.getInstance();
-                StorageReference storageRef = storage.getReferenceFromUrl("gs://simpletalk-ce063.appspot.com");
-                StorageReference imageRef = storageRef.child(msgData.getData());
-
                 chatMag = new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()) ? ChatMessage.SIDE_RIGHT : ChatMessage.SIDE_LEFT,
                         "이미지 로드중...", userName);
 
-                final ChatMessage finalChatMag = chatMag;
-                imageRef.getBytes(MAX_FILESIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                    @Override
-                    public void onSuccess(byte[] bytes) {
-                        finalChatMag.bytes = bytes;
-                        finalChatMag.type = ChatMessage.TYPE_IMAGE;
-
-                        chatArrayAdapter.notifyDataSetChanged();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        finalChatMag.message = "이미지 로드 실패";
-                        chatArrayAdapter.notifyDataSetChanged();
-                    }
-                });
+                FileSerivce.getInstance().getImage(chatArrayAdapter, chatMag, msgData);
                 break;
             default:
                 chatMag = new ChatMessage(ChatMessage.SIDE_CENTER, msgData.getData());
@@ -222,26 +202,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         if (requestCode == PICK_FROM_GALLERY) {
             Uri fileUri = data.getData();
             if (fileUri != null) {
-                FirebaseStorage storage = FirebaseStorage.getInstance();
-                StorageReference storageRef = storage.getReferenceFromUrl("gs://simpletalk-ce063.appspot.com");
-                StorageReference imagesRef = storageRef.child("images/" + fileUri.getLastPathSegment());
-                UploadTask uploadTask = imagesRef.putFile(fileUri);
-
-                uploadTask.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                        //Uri downloadUrl = taskSnapshot.getStorage().getPath();
-
-                        chatService.sendImageUrlMsg(chatRoomId, taskSnapshot.getStorage().getPath());
-                        Toast.makeText(getBaseContext(), "사진 업로드가 완료되었습니다.",  Toast.LENGTH_LONG).show();
-                    }
-                });
+                FileSerivce.getInstance().uploadImage(this, chatService, chatRoomId, fileUri);
             }
         }
     }

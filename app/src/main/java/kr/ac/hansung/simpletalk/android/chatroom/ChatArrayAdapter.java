@@ -66,11 +66,11 @@ public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
             conentView = imageView;
             imageView.setImageBitmap(decodeToBitmap(chatMessageObj.bytes));
             imageView.setVisibility(View.VISIBLE);
-            chatText.setVisibility(View.INVISIBLE);
+            chatText.setVisibility(View.GONE);
         } else {
             conentView = chatText;
             chatText.setText(chatMessageObj.message);
-            imageView.setVisibility(View.INVISIBLE);
+            imageView.setVisibility(View.GONE);
             chatText.setVisibility(View.VISIBLE);
         }
 
@@ -93,8 +93,8 @@ public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
                 conentView.setBackgroundResource(R.drawable.bubble_c);
 				chatText.setText(chatMessageObj.message);
 				singleMessageContainer.setGravity(Gravity.CENTER);
-				userName.setVisibility(View.INVISIBLE);
-				userImage.setVisibility(View.INVISIBLE);
+				userName.setVisibility(View.GONE);
+				userImage.setVisibility(View.GONE);
 				break;
 		}
 		return row;

@@ -8,8 +8,8 @@
 
     <RelativeLayout
         android:id="@+id/singleMessageContainer"
-        android:layout_width="fill_parent"
-        android:layout_height="67dp" >
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
         <!--android:background="@drawable/bubble_b"-->
 
@@ -60,8 +60,7 @@
             app:srcCompat="@mipmap/ic_launcher"
             android:id="@+id/imageView"
             android:layout_below="@+id/name"
-            android:layout_toRightOf="@+id/userImage"
-            android:layout_toEndOf="@+id/userImage" />
+            android:layout_toRightOf="@+id/userImage" />
 
     </RelativeLayout>
 
