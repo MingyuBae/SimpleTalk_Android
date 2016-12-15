@@ -190,27 +190,19 @@ public class ChatService extends Thread {
         return;
     }
 
-    public boolean changeMyProfile(UserProfileVO userProfileVO){
-        try {
-            this.myProfile = userProfileVO.clone();     // 자바에서 이상하게 동일 객체 전송시 패킷을 정상적으로 못보내는 문제가 있음.
-
-            Thread thread = new Thread(){
-                @Override
-                public void run() {
-                    try {
-                        socketChatThread.sendMsg(MessageVO.MSG_TYPE_CHANGE_PROFILE, myProfile.getId(), 0, "", myProfile);
-                    } catch (IOException e) {
-                        Log.w("network", "프로필 수정 실패 - 네트워크 오류 (myProfile: " + myProfile + ")");
-                        e.printStackTrace();
-                    }
+    public void changeMyProfile(UserProfileVO userProfileVO){
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                try {
+                    socketChatThread.sendMsg(MessageVO.MSG_TYPE_CHANGE_PROFILE, myProfile.getId(), 0, "", myProfile);
+                } catch (IOException e) {
+                    Log.w("network", "프로필 수정 실패 - 네트워크 오류 (myProfile: " + myProfile + ")");
+                    e.printStackTrace();
                 }
-            };
-            thread.start();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-
-        return true;
+            }
+        };
+        thread.start();
     }
 
     public void initNetwork(String ip, int port){

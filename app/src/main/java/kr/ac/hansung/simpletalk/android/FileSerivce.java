@@ -3,9 +3,12 @@ package kr.ac.hansung.simpletalk.android;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
@@ -31,6 +34,8 @@ import kr.ac.hansung.simpletalk.android.chatroom.ChatArrayAdapter;
 import kr.ac.hansung.simpletalk.android.chatroom.ChatMessage;
 import kr.ac.hansung.simpletalk.transformVO.MessageVO;
 import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
+
+import static android.R.attr.bitmap;
 
 /**
  * Created by a3811 on 2016-12-14.
@@ -127,37 +132,82 @@ public class FileSerivce {
     }
 
     public void sendProfileImg(Context context, final ChatService chatService, final Uri imageUri) {
-        final StorageReference imagesRef = storageRef.child("profile/" + imageUri.getLastPathSegment() + "_"+ UUID.randomUUID().toString());
-
         try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
-            Bitmap resizeBitmap = imageResize(bitmap, 150);                      // 이미지 리사이징
-
-            /* JPEG로 파일 압축 */
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            resizeBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
-
-            /* 파일 업로드 */
-            UploadTask uploadTask = imagesRef.putBytes(data);
-
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    Log.w("profileImageUpload", "실패 - " + exception.toString());
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    UserProfileVO myProfile = chatService.getMyProfile();
-                    myProfile.setImgFileName(taskSnapshot.getStorage().getPath());
-                    chatService.changeMyProfile(myProfile);
-                    Log.w("profileImageUpload", "성공 - " + imagesRef.toString());
-                }
-            });
+            sendProfileImg(chatService, MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri));
         } catch (IOException e) {
             Log.w("imageUpload", "실패 - " + e.toString());
             e.printStackTrace();
+        }
+    }
+
+    public void sendProfileImg(final ChatService chatService, Bitmap bitmap) {
+        final StorageReference imagesRef = storageRef.child("profile/" + UUID.randomUUID().toString());
+
+        Bitmap resizeBitmap = imageResize(bitmap, 150);                      // 이미지 리사이징
+
+        /* JPEG로 파일 압축 */
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resizeBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        /* 파일 업로드 */
+        UploadTask uploadTask = imagesRef.putBytes(data);
+
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.w("profileImageUpload", "실패 - " + exception.toString());
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                UserProfileVO myProfile = chatService.getMyProfile();
+                myProfile.setImgFileName(taskSnapshot.getStorage().getPath());
+                chatService.changeMyProfile(myProfile);
+                Log.w("profileImageUpload", "성공 - " + imagesRef.toString());
+            }
+        });
+    }
+
+    public void roundLoadImage(Context context, final ArrayAdapter adapter, final ImageView imageView, final String path){
+        File localFile = tempFileMap.get(path);
+
+        if(localFile == null) {
+            /* 디바이스에 이미지 파일이 없는 경우 */
+            StorageReference imageRef = storageRef.child(path);
+            try {
+                localFile = File.createTempFile("images", "jpg");
+
+                final File finalLocalFile = localFile;
+                imageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>(){
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot){
+                        Log.w("ImageDownload", "성공 - " + finalLocalFile.getPath());
+                        tempFileMap.put(path, finalLocalFile);
+
+                        if(adapter != null) {
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        Log.w("ImageDownload", "실패 - " +  exception.toString());
+                    }
+                });
+            } catch (IOException e) {}
+        } else {
+            try {
+                Bitmap bitmap = decodeToBitmap(getBytesFromFile(localFile));
+                RoundedBitmapDrawable bitmapDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), bitmap);
+                bitmapDrawable.setCornerRadius(Math.max(bitmap.getWidth(), bitmap.getHeight()) / 2.0f);
+                bitmapDrawable.setAntiAlias(true);
+
+                imageView.setImageDrawable(bitmapDrawable);
+            } catch (IOException e) {
+                imageView.setImageResource(android.R.drawable.stat_notify_error);
+                e.printStackTrace();
+            }
         }
     }
 
@@ -178,19 +228,12 @@ public class FileSerivce {
                 imageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>(){
                     @Override
                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot){
-                        try {
-                            getBytesFromFile(finalLocalFile);
-                            Log.w("ImageDownload", "성공 - " + finalLocalFile.getPath());
-                            tempFileMap.put(path, finalLocalFile);
+                    Log.w("ImageDownload", "성공 - " + finalLocalFile.getPath());
+                    tempFileMap.put(path, finalLocalFile);
 
-                            if(adapter != null) {
-                                adapter.notifyDataSetChanged();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            imageView.setImageResource(android.R.drawable.stat_notify_error);
-                            return;
-                        }
+                    if(adapter != null) {
+                        adapter.notifyDataSetChanged();
+                    }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override

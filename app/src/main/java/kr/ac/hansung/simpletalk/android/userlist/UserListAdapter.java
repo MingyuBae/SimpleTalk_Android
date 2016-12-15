@@ -88,7 +88,7 @@ public class UserListAdapter extends ArrayAdapter<UserProfileVO> {
         userProfileCheckbox.setFocusableInTouchMode(false);
 
         if(userProfileData.getImgFileName() != null && !userProfileData.getImgFileName().isEmpty()) {
-            FileSerivce.getInstance().loadImage(this, userProfileImage, userProfileData.getImgFileName());
+            FileSerivce.getInstance().roundLoadImage(getContext(), this, userProfileImage, userProfileData.getImgFileName());
         }
 
         return convertView;

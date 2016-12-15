@@ -2,7 +2,7 @@ package kr.ac.hansung.simpletalk.transformVO;
 
 import java.io.Serializable;
 
-public class UserProfileVO implements Serializable, Cloneable {
+public class UserProfileVO implements Serializable{
     private static final long serialVersionUID = -6685433305922446988L;
 
     private Integer id;
@@ -26,12 +26,6 @@ public class UserProfileVO implements Serializable, Cloneable {
         this.imgFileName = imgFileName;
         this.enable = enable;
     }
-
-    public UserProfileVO clone() throws CloneNotSupportedException {
-        UserProfileVO userProfileVO = (UserProfileVO) super.clone();
-        return userProfileVO;
-    }
-
 
     public Integer getId() {
         return id;
