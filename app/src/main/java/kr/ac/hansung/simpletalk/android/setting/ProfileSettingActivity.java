@@ -70,12 +70,6 @@ public class ProfileSettingActivity extends AppCompatActivity {
                 // Gallery 호출
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                // 잘라내기 셋팅
-                intent.putExtra("crop", "true");
-                intent.putExtra("aspectX", 0);
-                intent.putExtra("aspectY", 0);
-                intent.putExtra("outputX", 200);
-                intent.putExtra("outputY", 150);
                 try {
                     intent.putExtra("return-data", true);
                     startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_GALLERY);

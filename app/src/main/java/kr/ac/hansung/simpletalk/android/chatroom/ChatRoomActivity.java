@@ -1,17 +1,25 @@
 package kr.ac.hansung.simpletalk.android.chatroom;
 
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -28,10 +36,19 @@ import com.vanniktech.emoji.listeners.OnEmojiPopupShownListener;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardCloseListener;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardOpenListener;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import kr.ac.hansung.simpletalk.android.ChatService;
 import kr.ac.hansung.simpletalk.android.FileSerivce;
 import kr.ac.hansung.simpletalk.android.R;
+import kr.ac.hansung.simpletalk.android.setting.NetworkSettingActivity;
+import kr.ac.hansung.simpletalk.android.setting.ProfileSettingActivity;
+import kr.ac.hansung.simpletalk.android.userlist.UserListActivity;
+import kr.ac.hansung.simpletalk.android.userlist.UserListAdapter;
 import kr.ac.hansung.simpletalk.transformVO.MessageVO;
+import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 
 public class ChatRoomActivity extends AppCompatActivity {
     private static final int PICK_FROM_CAMERA = 1;
@@ -137,6 +154,80 @@ public class ChatRoomActivity extends AppCompatActivity {
         });
 
         getSupportActionBar().setTitle(chatRoomData.getRoomName());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.activity_chat_room, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.enterUserListView:
+            {
+                View view = getLayoutInflater().inflate(R.layout.dialog_listview, null);
+
+                ListView listview = (ListView) view.findViewById(R.id.listView);
+                UserListAdapter userListAdapter = new UserListAdapter(this, R.layout.listview_item_userprofile);
+                userListAdapter.addAll(chatRoomData.getEnterUserProfileList());
+                listview.setAdapter(userListAdapter);
+
+                AlertDialog.Builder listViewDialog = new AlertDialog.Builder(this);
+                listViewDialog.setView(view);
+                listViewDialog.setPositiveButton("확인", null);
+                listViewDialog.show();
+
+                return true;
+            }
+            case R.id.addUser:
+            {
+                final List<UserProfileVO> addTargetUserList = new LinkedList<>();
+                final ArrayList<String> items = new ArrayList<String>() ;
+                final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, items) ;
+
+                for(UserProfileVO userProfile: chatService.getUserProfileMap().values()) {
+                    if(! chatRoomData.getEnterUserProfileList().contains(userProfile)) {
+                        addTargetUserList.add(userProfile);
+                        items.add(userProfile.getName() + " (id: " + userProfile.getId() + ")");
+                    }
+                }
+
+                View view = getLayoutInflater().inflate(R.layout.dialog_listview, null);
+                final ListView listview = (ListView) view.findViewById(R.id.listView);
+                listview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+
+                listview.setAdapter(adapter);
+
+                AlertDialog.Builder listViewDialog = new AlertDialog.Builder(this);
+                listViewDialog.setView(view);
+                listViewDialog.setPositiveButton("추가", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String userIdListString = "";
+                        SparseBooleanArray checkedItems = listview.getCheckedItemPositions();
+
+                        if(checkedItems != null || checkedItems.size() < 1){
+                            int addUserIds[] = new int[checkedItems.size()];
+                            for(int i=0; i<checkedItems.size(); i++){
+                                addUserIds[i] = addTargetUserList.get(checkedItems.keyAt(i)).getId();
+                            }
+
+                            ChatService.getInstance().addUserRoom(chatRoomId, addUserIds);
+                        } else {
+                            Toast.makeText(getBaseContext(), "추가하는 사용자를 1인 이상 선택해주십시오.", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+                listViewDialog.setNegativeButton("취소", null);
+                listViewDialog.show();
+
+                return true;
+            }
+        }
+        return false;
     }
 
     private void sendMessage(){

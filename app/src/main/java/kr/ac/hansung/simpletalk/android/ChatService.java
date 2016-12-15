@@ -85,6 +85,8 @@ public class ChatService extends Thread {
                         ChatRoomClientVO chatRoomData = chatRoomMap.get(msgData.getRoomId());
                         if(chatRoomData == null) {
                             Log.w("exitRoom", "접속하지 않은 채팅방의 알림 수신! - roomId: " + msgData.getRoomId());
+                        } else {
+                            chatRoomData.setEnterUserProfileList((LinkedList<UserProfileVO>) msgData.getObject());
                         }
 
                         msgData.setData( msgData.getData() + " 퇴장");
@@ -181,6 +183,25 @@ public class ChatService extends Thread {
                 } catch (IOException | ClassNotFoundException e) {
                     Log.w("makeChatRoom", "실패 (roomName: " + roomName + ", enterUserIdString: "
                             + enterUserIdString + ")");
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+
+        return;
+    }
+
+    public void addUserRoom(final int chatRoomId, final int[] addUserIds){
+
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                try {
+                    socketChatThread.addChatRoomUser(chatRoomId, addUserIds);
+                } catch (IOException e) {
+                    Log.w("addUserRoom", "실패 (chatRoomId: " + chatRoomId + ", addUserIds: "
+                            + addUserIds + ")");
                     e.printStackTrace();
                 }
             }

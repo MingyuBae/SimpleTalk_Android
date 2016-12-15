@@ -47,6 +47,9 @@ public class MakeChatRoomActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
 
         final ListView listview = (ListView) findViewById(R.id.userListView) ;
+        listview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+
+
         listview.setAdapter(adapter);
 
         addChatRoomBtn.setOnClickListener(new View.OnClickListener() {
@@ -67,7 +70,6 @@ public class MakeChatRoomActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(getBaseContext(), "채팅에 참여하는 사용자를 2인 이상 선택해주십시오.", Toast.LENGTH_LONG).show();
                 }
-
             }
         });
     }
