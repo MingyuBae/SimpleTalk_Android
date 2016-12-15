@@ -18,8 +18,6 @@ public class MessageVO implements Serializable{
 	public static final String MSG_TYPE_INFO = "INFO";
 
 	public static final String MSG_SPLIT_CHAR = ";";
-	public static final String MSG_SUCCESS = "SUCCESS";
-	public static final String MSG_ERROR = "ERROR";
 
 	private Integer senderId;
 	private String type;

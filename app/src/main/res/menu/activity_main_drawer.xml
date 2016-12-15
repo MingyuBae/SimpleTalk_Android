@@ -7,30 +7,13 @@
             android:icon="@drawable/ic_menu_camera"
             android:title="사용자 목록" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
+            android:id="@+id/nav_network_setting"
+            android:icon="@drawable/ic_menu_send"
+            android:title="네트워크 설정" />
         <item
             android:id="@+id/nav_profile_setting"
             android:icon="@drawable/ic_menu_manage"
             android:title="설정" />
     </group>
-
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
-        </menu>
-    </item>
 
 </menu>

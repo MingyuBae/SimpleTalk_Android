@@ -29,8 +29,8 @@ public class ChatService extends Thread {
     private Map<Integer, ChatRoomClientVO> chatRoomMap = Collections.synchronizedMap(new HashMap<Integer, ChatRoomClientVO>());
 
     private Handler nowActivityHandler;
-    private String ip = "192.168.1.128"; //"223.194.157.33"; // IP
-    private int port = 30000; // PORT번호
+    private String ip;// IP
+    private int port; // PORT번호
     private boolean runable = false;
 
     private Handler socketHandler = new Handler(){
@@ -190,19 +190,25 @@ public class ChatService extends Thread {
         return;
     }
 
-    public boolean changeMyProfile(final UserProfileVO userProfileVO){
-        Thread thread = new Thread(){
-            @Override
-            public void run() {
-                try {
-                    socketChatThread.sendMsg(MessageVO.MSG_TYPE_CHANGE_PROFILE, myProfile.getId(), 0, "", myProfile);
-                } catch (IOException e) {
-                    Log.w("network", "프로필 수정 실패 - 네트워크 오류 (userProfileVO: " + userProfileVO + ")");
-                    e.printStackTrace();
+    public boolean changeMyProfile(UserProfileVO userProfileVO){
+        try {
+            this.myProfile = userProfileVO.clone();     // 자바에서 이상하게 동일 객체 전송시 패킷을 정상적으로 못보내는 문제가 있음.
+
+            Thread thread = new Thread(){
+                @Override
+                public void run() {
+                    try {
+                        socketChatThread.sendMsg(MessageVO.MSG_TYPE_CHANGE_PROFILE, myProfile.getId(), 0, "", myProfile);
+                    } catch (IOException e) {
+                        Log.w("network", "프로필 수정 실패 - 네트워크 오류 (myProfile: " + myProfile + ")");
+                        e.printStackTrace();
+                    }
                 }
-            }
-        };
-        thread.start();
+            };
+            thread.start();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
 
         return true;
     }

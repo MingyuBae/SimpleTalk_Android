@@ -15,10 +15,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import kr.ac.hansung.simpletalk.android.FileSerivce;
 import kr.ac.hansung.simpletalk.android.R;
 
 public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
 	private List<ChatMessage> chatMessageList = new ArrayList<ChatMessage>();
+	private FileSerivce fileSerivce = FileSerivce.getInstance();
 
 	@Override
 	public void add(ChatMessage object) {
@@ -60,11 +62,16 @@ public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
 		//사용자 프로필사진
         userImage.setImageResource(R.drawable.ic_menu_gallery);
 
+		if(chatMessageObj.profileImagePath != null && !chatMessageObj.profileImagePath.isEmpty()) {
+			fileSerivce.loadImage(this, userImage, chatMessageObj.profileImagePath);
+		}
+
         // 내용
         View conentView;
         if(chatMessageObj.type == ChatMessage.TYPE_IMAGE){
             conentView = imageView;
-            imageView.setImageBitmap(decodeToBitmap(chatMessageObj.bytes));
+            imageView.setImageResource(android.R.drawable.stat_sys_download);
+			fileSerivce.loadImage(this, imageView, chatMessageObj.message);
             imageView.setVisibility(View.VISIBLE);
             chatText.setVisibility(View.GONE);
         } else {
@@ -73,9 +80,6 @@ public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
             imageView.setVisibility(View.GONE);
             chatText.setVisibility(View.VISIBLE);
         }
-
-		//chatText.setBackgroundResource(chatMessageObj.left ? R.drawable.bubble_b : R.drawable.bubble_a);
-		//사용자에 따라 출력 방향 다르게하기
 
         userName.setVisibility(View.VISIBLE);
         userImage.setVisibility(View.VISIBLE);
@@ -99,9 +103,4 @@ public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
 		}
 		return row;
 	}
-
-	public Bitmap decodeToBitmap(byte[] decodedByte) {
-		return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-	}
-
 }

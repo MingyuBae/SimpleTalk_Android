@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import kr.ac.hansung.simpletalk.android.FileSerivce;
 import kr.ac.hansung.simpletalk.android.R;
 import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 
@@ -85,6 +86,10 @@ public class UserListAdapter extends ArrayAdapter<UserProfileVO> {
                 ? false : checkedUserMap.get(position));
         userProfileCheckbox.setFocusable(false);
         userProfileCheckbox.setFocusableInTouchMode(false);
+
+        if(userProfileData.getImgFileName() != null && !userProfileData.getImgFileName().isEmpty()) {
+            FileSerivce.getInstance().loadImage(this, userProfileImage, userProfileData.getImgFileName());
+        }
 
         return convertView;
     }

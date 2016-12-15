@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_profile_setting"
     android:layout_width="match_parent"
@@ -37,20 +38,6 @@
         android:layout_alignParentEnd="true"
         android:id="@+id/profileEditNameEditText" />
 
-    <TextView
-        android:text="상태"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/profileEditStatText"
-        android:padding="10dp"
-        android:gravity="right|center_vertical"
-        android:textSize="18sp"
-        android:layout_alignBottom="@+id/profileEditStatEditText"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@+id/profileEditButton"
-        android:layout_toStartOf="@+id/profileEditButton" />
-
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -71,4 +58,27 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="154dp"
         android:id="@+id/profileEditButton" />
+
+    <TextView
+        android:text="상태"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/profileEditStatText"
+        android:padding="10dp"
+        android:gravity="right|center_vertical"
+        android:textSize="18sp"
+        android:layout_alignBottom="@+id/profileEditStatEditText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@mipmap/ic_launcher"
+        android:layout_below="@+id/profileEditStatText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="32dp"
+        android:id="@+id/imageButton" />
+
 </RelativeLayout>

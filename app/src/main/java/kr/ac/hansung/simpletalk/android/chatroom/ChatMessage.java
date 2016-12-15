@@ -9,20 +9,23 @@ public class ChatMessage {
     public static final int TYPE_IMAGE = 1;
 
     public String side;
+    public int type = TYPE_TEXT;
 	public String message;
     public String userName;
-    public int type = TYPE_TEXT;
-    public byte[] bytes;
+    public String profileImagePath;
+
 
     public ChatMessage(String side, String message) {
-        this(side, message, "");
+        this(side, TYPE_TEXT, message, "", null);
     }
 
-	public ChatMessage(String side, String message, String userName) {
+	public ChatMessage(String side, int type, String message, String userName, String profileImagePath) {
 		super();
 		this.side = side;
+        this.type = type;
 		this.message = message;
         this.userName = userName;
+        this.profileImagePath = profileImagePath;
 	}
 
     public void drawImage(byte[] bytes){

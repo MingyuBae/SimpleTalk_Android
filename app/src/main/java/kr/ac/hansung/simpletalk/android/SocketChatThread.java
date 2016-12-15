@@ -107,23 +107,18 @@ public class SocketChatThread extends Thread {
     }
 
     public void sendTextMsg(int chatRoomId, int myId, String sendText) throws IOException {
-        MessageVO msg2 = new MessageVO();
-        msg2.setType(MessageVO.MSG_TYPE_TEXT);
-        msg2.setData(sendText);
-        msg2.setSenderId(myId);
-        msg2.setRoomId(chatRoomId);
-
-        objectOutputStream.writeObject(msg2);
+        sendMsg(MessageVO.MSG_TYPE_TEXT, myId, chatRoomId, sendText, null);
     }
 
-    public void sendMsg(String type, int senderId, int chatRoomId, String data, Serializable object) throws IOException {
+    public synchronized void sendMsg(String type, int senderId, int chatRoomId, String data, Serializable object) throws IOException {
         MessageVO msg2 = new MessageVO();
         msg2.setType(type);
         msg2.setSenderId(senderId);
         msg2.setRoomId(chatRoomId);
         msg2.setData(data);
         msg2.setObject(object);
-
+        objectOutputStream.reset();             // 리셋하지 않으면 동일한 레퍼런스값을 가진 객체를 전송시 리셋하지 않으면 갱신된 데이터를 전송하지 않는 문제가 있음
+                                                   // 참조: http://stackoverflow.com/questions/12341086/java-socket-serialization-object-wont-update
         objectOutputStream.writeObject(msg2);
     }
 

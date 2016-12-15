@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,17 +13,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.vanniktech.emoji.EmojiEditText;
 import com.vanniktech.emoji.EmojiPopup;
 import com.vanniktech.emoji.emoji.Emoji;
@@ -35,10 +28,8 @@ import com.vanniktech.emoji.listeners.OnEmojiPopupShownListener;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardCloseListener;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardOpenListener;
 
-import java.io.ByteArrayOutputStream;
-import java.util.UUID;
-
 import kr.ac.hansung.simpletalk.android.ChatService;
+import kr.ac.hansung.simpletalk.android.FileSerivce;
 import kr.ac.hansung.simpletalk.android.R;
 import kr.ac.hansung.simpletalk.transformVO.MessageVO;
 
@@ -158,20 +149,22 @@ public class ChatRoomActivity extends AppCompatActivity {
         ChatMessage chatMag = null;
 
         String userName = "(퇴장한 사용자)";
+        String profileImagePath = null;
         try {
             userName = chatService.getUserProfileMap().get(msgData.getSenderId()).getName();
+            profileImagePath = chatService.getUserProfileMap().get(msgData.getSenderId()).getImgFileName();
         }catch (NullPointerException e){}
 
         switch (msgData.getType()) {
             case MessageVO.MSG_TYPE_TEXT:
                 chatMag = new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()) ? ChatMessage.SIDE_RIGHT : ChatMessage.SIDE_LEFT,
-                    msgData.getData(), userName);
+                        ChatMessage.TYPE_TEXT, msgData.getData(), userName, profileImagePath);
                 break;
             case MessageVO.MSG_TYPE_IMAGE:
                 chatMag = new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()) ? ChatMessage.SIDE_RIGHT : ChatMessage.SIDE_LEFT,
-                        "이미지 로드중...", userName);
+                        ChatMessage.TYPE_IMAGE, msgData.getData(), userName, profileImagePath);
 
-                FileSerivce.getInstance().getImage(chatArrayAdapter, chatMag, msgData);
+                //FileSerivce.getInstance().getImageMsg(chatArrayAdapter, chatMag, msgData);
                 break;
             default:
                 chatMag = new ChatMessage(ChatMessage.SIDE_CENTER, msgData.getData());
@@ -202,7 +195,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         if (requestCode == PICK_FROM_GALLERY) {
             Uri fileUri = data.getData();
             if (fileUri != null) {
-                FileSerivce.getInstance().uploadImage(this, chatService, chatRoomId, fileUri);
+                FileSerivce.getInstance().sendImageMsg(this, chatService, chatRoomId, fileUri);
             }
         }
     }
