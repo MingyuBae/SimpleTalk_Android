@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -19,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -58,7 +60,7 @@ public class ChatRoomActivity extends AppCompatActivity {
     private ChatService chatService;
     private ChatArrayAdapter chatArrayAdapter;
     private ChatRoomClientVO chatRoomData;
-    private Button buttonSend;
+    private ImageButton buttonSend;
     private Button imageSend;
     private EmojiEditText chatText;
     private EmojiPopup emojiPopup;
@@ -69,16 +71,15 @@ public class ChatRoomActivity extends AppCompatActivity {
     private Handler serviceHandler = new Handler(){
         public void handleMessage(android.os.Message msg) {
             MessageVO msgData = (MessageVO)msg.getData().getSerializable("msg");
-            if(msgData != null) {
+            if(msgData != null &&
+                            (MessageVO.MSG_TYPE_IMAGE.equals(msgData.getType()) ||
+                            MessageVO.MSG_TYPE_TEXT.equals(msgData.getType()) ||
+                            MessageVO.MSG_TYPE_ADD_CHATROOM_USER.equals(msgData.getType()) ||
+                            MessageVO.MSG_TYPE_EXIT_CHATROOM_USER.equals(msgData.getType()))) {
                 if(msgData.getRoomId() != null && chatRoomId.equals(msgData.getRoomId())) {
                     chatArrayAdapter.add(chatMassgeConverter(msgData));
                 }
             }
-
-            //chat_list.append(r_msg + "\n");
-            //if(!m.getId().equals(login_id))
-            //if (!r_msg.contains(login_id))
-            //   newNotification(r_msg);			// 알림기능 (알림바에 알림 추가)
         }
     };
 
@@ -108,7 +109,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         chatText = (EmojiEditText) findViewById(R.id.chatText);
         imageSend = (Button)findViewById(R.id.imageSend);
         emoticonSend = (ImageButton) findViewById(R.id.emoticonSend);
-        buttonSend = (Button) findViewById(R.id.buttonSend);
+        buttonSend = (ImageButton) findViewById(R.id.buttonSend);
 
         setUpEmojiPopup();
 
@@ -223,6 +224,24 @@ public class ChatRoomActivity extends AppCompatActivity {
                 });
                 listViewDialog.setNegativeButton("취소", null);
                 listViewDialog.show();
+
+                return true;
+            }
+            case R.id.exitRoom:
+            {
+                final ChatRoomClientVO chatRoomData = chatService.getChatRoomMap().get(chatRoomId);
+
+                AlertDialog.Builder ab = new AlertDialog.Builder(this);
+                ab.setMessage("채팅방을 나가시겠습니까?");
+                ab.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        chatService.exitRoom(chatRoomData.getChatRoomId());
+                        finish();
+                    }
+                });
+                ab.setNegativeButton("아니요", null);
+                ab.show();
 
                 return true;
             }

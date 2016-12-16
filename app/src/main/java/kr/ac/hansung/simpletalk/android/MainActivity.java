@@ -1,14 +1,13 @@
 package kr.ac.hansung.simpletalk.android;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,27 +18,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import kr.ac.hansung.simpletalk.android.chatroom.ChatArrayAdapter;
-import kr.ac.hansung.simpletalk.android.chatroom.ChatMessage;
 import kr.ac.hansung.simpletalk.android.chatroom.ChatRoomActivity;
 import kr.ac.hansung.simpletalk.android.chatroom.ChatRoomClientVO;
 import kr.ac.hansung.simpletalk.android.chatroom.MakeChatRoomActivity;
 import kr.ac.hansung.simpletalk.android.setting.NetworkSettingActivity;
 import kr.ac.hansung.simpletalk.android.setting.ProfileSettingActivity;
 import kr.ac.hansung.simpletalk.android.userlist.UserListActivity;
-import kr.ac.hansung.simpletalk.android.userlist.UserListAdapter;
-import kr.ac.hansung.simpletalk.android.R;
 import kr.ac.hansung.simpletalk.transformVO.MessageVO;
 import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 
@@ -62,13 +50,19 @@ public class MainActivity extends AppCompatActivity
                     case MessageVO.MSG_TYPE_CHANGE_PROFILE:
                     case MessageVO.MSG_TYPE_INIT_PROFILE:
                         UserProfileVO profile = (UserProfileVO) msgData.getObject();
-                        if(profile.getId() == chatService.getMyProfile().getId()
+                        if(profile.getId().equals(chatService.getMyProfile().getId())
                                 || MessageVO.MSG_TYPE_INIT_PROFILE.equals(msgData.getType())){
                             TextView userName = (TextView) findViewById(R.id.userName);
                             TextView userStateMsg = (TextView) findViewById(R.id.userStateMsg);
+                            ImageView userImage = (ImageView)findViewById(R.id.userProfileImage);
+                            if(profile != null && userName != null && userStateMsg != null && userImage != null) {
+                                userName.setText(profile.getName() + "(id: " + profile.getId() + ")");
+                                userStateMsg.setText(profile.getStateMsg());
 
-                            userName.setText(profile.getName() + "(id: " + profile.getId() + ")");
-                            userStateMsg.setText(profile.getStateMsg());
+                                if (profile.getImgFileName() != null && !profile.getImgFileName().isEmpty()) {
+                                    FileSerivce.getInstance().roundLoadImage(getBaseContext(), null, userImage, profile.getImgFileName());
+                                }
+                            }
                         }
                         break;
 
@@ -101,8 +95,8 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            Intent intent = new Intent(getBaseContext(), MakeChatRoomActivity.class);
-            startActivity(intent);
+                Intent intent = new Intent(getBaseContext(), MakeChatRoomActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -150,12 +144,17 @@ public class MainActivity extends AppCompatActivity
 
         TextView userName = (TextView) findViewById(R.id.userName);
         TextView userStateMsg = (TextView) findViewById(R.id.userStateMsg);
+        ImageView userImage = (ImageView)findViewById(R.id.userProfileImage);
 
         UserProfileVO profile = chatService.getMyProfile();
 
-        if(profile != null) {
+        if(profile != null && userName != null && userStateMsg != null && userImage != null) {
             userName.setText(profile.getName() + "(id: " + profile.getId() + ")");
             userStateMsg.setText(profile.getStateMsg());
+
+            if(profile.getImgFileName() != null && !profile.getImgFileName().isEmpty()){
+                FileSerivce.getInstance().roundLoadImage(this, null, userImage, profile.getImgFileName());
+            }
         }
     }
 
@@ -171,19 +170,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -211,15 +205,5 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private void changeProfile(UserProfileVO userProfileData){
-        TextView userName = (TextView)findViewById(R.id.userName);
-        TextView userStateMsg = (TextView)findViewById(R.id.userStateMsg);
-
-        if(userName != null && userStateMsg != null) {
-            userName.setText(userProfileData.getName() + " (userID: " + userProfileData.getId() + ")");
-            userStateMsg.setText(userProfileData.getStateMsg());
-        }
     }
 }

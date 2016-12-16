@@ -11,74 +11,89 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="kr.ac.hansung.simpletalk.android.setting.ProfileSettingActivity">
 
-    <TextView
-        android:text="이름"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/profileEditNameText"
-        android:layout_alignBottom="@+id/profileEditNameEditText"
-        android:gravity="right|center_vertical"
-        android:includeFontPadding="false"
-        android:padding="10dp"
-        android:textSize="18sp"
-        android:layout_alignRight="@+id/profileEditStatText"
-        android:layout_alignEnd="@+id/profileEditStatText" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="Name"
-        android:ems="10"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:id="@+id/profileEditNameEditText" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="Name"
-        android:ems="10"
-        android:id="@+id/profileEditStatEditText"
-        android:layout_marginTop="34dp"
-        android:layout_below="@+id/profileEditNameEditText"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:text="확인"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="154dp"
-        android:id="@+id/profileEditButton" />
-
-    <TextView
-        android:text="상태"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/profileEditStatText"
-        android:padding="10dp"
-        android:gravity="right|center_vertical"
-        android:textSize="18sp"
-        android:layout_alignBottom="@+id/profileEditStatEditText"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@mipmap/ic_launcher"
-        android:layout_below="@+id/profileEditStatText"
+        android:id="@+id/imageButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="32dp"
-        android:id="@+id/imageButton" />
+        android:background="?attr/selectableItemBackgroundBorderless" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/cropCheckBox"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="55dp">
+
+        <TextView
+            android:text="이름"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/profileEditNameText"
+            android:gravity="right|center_vertical"
+            android:includeFontPadding="false"
+            android:padding="10dp"
+            android:textSize="18sp"
+            android:layout_alignTop="@+id/profileEditNameEditText"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:text="상태"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/profileEditStatText"
+            android:padding="10dp"
+            android:gravity="right|center_vertical"
+            android:textSize="18sp"
+            android:layout_alignBottom="@+id/profileEditStatEditText"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="Name"
+            android:ems="10"
+            android:id="@+id/profileEditNameEditText"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="Name"
+            android:ems="10"
+            android:id="@+id/profileEditStatEditText"
+            android:layout_below="@+id/profileEditNameEditText"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="15dp" />
+
+        <Button
+            android:text="확인"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/profileEditButton"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+    <CheckBox
+        android:text="사진 자르기"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="23dp"
+        android:layout_marginStart="23dp"
+        android:id="@+id/cropCheckBox"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/imageButton"
+        android:layout_toEndOf="@+id/imageButton" />
 
 </RelativeLayout>

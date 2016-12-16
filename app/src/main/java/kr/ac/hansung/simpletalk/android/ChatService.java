@@ -83,15 +83,15 @@ public class ChatService extends Thread {
 
                     case MessageVO.MSG_TYPE_EXIT_CHATROOM_USER:
                         ChatRoomClientVO chatRoomData = chatRoomMap.get(msgData.getRoomId());
-                        if(chatRoomData == null) {
+                        if (chatRoomData == null) {
                             Log.w("exitRoom", "접속하지 않은 채팅방의 알림 수신! - roomId: " + msgData.getRoomId());
                         } else {
                             chatRoomData.setEnterUserProfileList((LinkedList<UserProfileVO>) msgData.getObject());
                         }
 
-                        msgData.setData( msgData.getData() + " 퇴장");
+                        msgData.setData(msgData.getData() + " 퇴장");
 
-                        if(msgData.getRoomId() == 0){
+                        if (msgData.getRoomId() == 0) {
                             mappingUserProfileMap((LinkedList<UserProfileVO>) msgData.getObject());
                         }
                         chatRoomData.addMessageList(msgData);
@@ -202,6 +202,26 @@ public class ChatService extends Thread {
                 } catch (IOException e) {
                     Log.w("addUserRoom", "실패 (chatRoomId: " + chatRoomId + ", addUserIds: "
                             + addUserIds + ")");
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+
+        return;
+    }
+
+    public void exitRoom(final int chatRoomId){
+
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                try {
+                    socketChatThread.sendMsg(MessageVO.MSG_TYPE_EXIT_CHATROOM_USER, myProfile.getId(), chatRoomId, null, null);
+
+                    chatRoomMap.remove(chatRoomId);
+                } catch (IOException e) {
+                    Log.w("exitRoom", "실패 (chatRoomId: " + chatRoomId + ")");
                     e.printStackTrace();
                 }
             }

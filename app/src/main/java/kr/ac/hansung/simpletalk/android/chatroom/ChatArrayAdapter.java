@@ -60,7 +60,7 @@ public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
 		userName.setText(chatMessageObj.userName);
 
 		//사용자 프로필사진
-        userImage.setImageResource(R.drawable.ic_menu_gallery);
+        userImage.setImageResource(R.mipmap.ic_launcher);
 
 		if(chatMessageObj.profileImagePath != null && !chatMessageObj.profileImagePath.isEmpty()) {
 			fileSerivce.roundLoadImage(getContext(), this, userImage, chatMessageObj.profileImagePath);

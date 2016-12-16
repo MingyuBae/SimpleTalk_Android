@@ -8,4 +8,6 @@
     <item android:title="참가자 추가"
         android:id="@+id/addUser"
         android:icon="@android:drawable/ic_input_add" />
+    <item android:title="나가기"
+        android:id="@+id/exitRoom" />
 </menu>
