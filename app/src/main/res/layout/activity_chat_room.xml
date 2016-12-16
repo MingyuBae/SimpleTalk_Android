@@ -19,14 +19,17 @@
         android:orientation="horizontal"
         android:weightSum="1">
 
-        <Button
+        <ImageButton
             android:text="+"
             android:layout_width="34dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/imageSend"
+            android:layout_height="42dp"
+            android:id="@+id/otherSend"
+            android:src="@android:drawable/ic_input_add"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_alignTop="@+id/chatText"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:layout_weight="0.05" />
 
         <com.vanniktech.emoji.EmojiEditText
             android:layout_width="wrap_content"
@@ -70,6 +73,7 @@
         android:divider="#ffffff"
         android:layout_above="@+id/form"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="18dp" />
 
 </RelativeLayout>

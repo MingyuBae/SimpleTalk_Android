@@ -97,38 +97,43 @@ public class FileSerivce {
         return resized == null ? bitmap : resized;
     }
 
-    public void sendImageMsg(Context context, final ChatService chatService, final int chatId, final Uri imageUri) {
-        final StorageReference imagesRef = storageRef.child("images/" + imageUri.getLastPathSegment() + "_"+ UUID.randomUUID().toString());
-
+    public void sendImageMsg(Context context, ChatService chatService, int roomId, Uri imageUri) {
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
-            Bitmap resizeBitmap = imageResize(bitmap, 500);                      // 이미지 리사이징
 
-            /* JPEG로 파일 압축 */
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            resizeBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
-
-            /* 파일 업로드 */
-            UploadTask uploadTask = imagesRef.putBytes(data);
-
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    Log.w("imageUpload", "실패 - " + exception.toString());
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                    chatService.sendImageUrlMsg(chatId, taskSnapshot.getStorage().getPath());
-                    Log.w("imageUpload", "성공 - " + imagesRef.toString());
-                }
-            });
+            sendImageMsg(chatService, roomId, bitmap);
         } catch (IOException e) {
             Log.w("imageUpload", "실패 - " + e.toString());
             e.printStackTrace();
         }
+    }
+
+    public void sendImageMsg(final ChatService chatService, final int roomId, final Bitmap bitmap) {
+        final StorageReference imagesRef = storageRef.child("images/" + UUID.randomUUID().toString());
+
+        Bitmap resizeBitmap = imageResize(bitmap, 500);                      // 이미지 리사이징
+
+        /* JPEG로 파일 압축 */
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resizeBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        /* 파일 업로드 */
+        UploadTask uploadTask = imagesRef.putBytes(data);
+
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.w("imageUpload", "실패 - " + exception.toString());
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                chatService.sendImageUrlMsg(roomId, taskSnapshot.getStorage().getPath());
+                Log.w("imageUpload", "성공 - " + imagesRef.toString());
+            }
+        });
     }
 
     public void sendProfileImg(Context context, final ChatService chatService, final Uri imageUri) {

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp">
+
+            <ImageButton
+                android:layout_width="124dp"
+                android:layout_height="119dp"
+                android:src="@drawable/r01"
+                android:id="@+id/r01"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_weight="0.14" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/r02"
+                android:id="@+id/r02"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/r03"
+                android:id="@+id/r03"
+                android:layout_weight="1.01"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/r04"
+                android:id="@+id/r04"
+                android:layout_weight="0.23"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                />
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/r05"
+                android:id="@+id/r05"
+                android:layout_weight="0.23"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                />
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/r06"
+                android:id="@+id/r06"
+                android:layout_weight="0.23"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/r07"
+            android:id="@+id/r07"
+            android:layout_weight="0.23"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            />
+    </LinearLayout>
+
+</LinearLayout>

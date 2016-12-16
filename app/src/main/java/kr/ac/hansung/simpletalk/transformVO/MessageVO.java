@@ -6,7 +6,7 @@ public class MessageVO implements Serializable{
 	private static final long serialVersionUID = -6090068067415581658L;
 
 	public static final String MSG_TYPE_TEXT = "TEXT";
-	public static final String MSG_TYPE_STICKER = "STICKER";
+	public static final String MSG_TYPE_EMOTICON = "EMOTICON";
 	public static final String MSG_TYPE_IMAGE = "IMG";
 	public static final String MSG_TYPE_MAKEROOM = "MAKEROOM";
 	public static final String MSG_TYPE_EXIT_CHATROOM_USER = "EXITROOM";
@@ -14,8 +14,6 @@ public class MessageVO implements Serializable{
 	public static final String MSG_TYPE_CHANGE_PROFILE ="CHANGE_PROFILE";
 	public static final String MSG_TYPE_INIT_PROFILE ="INIT_PROFILE";
 	public static final String MSG_TYPE_ADD_CHATROOM_USER = "ADD_CHATROOM_USER";
-
-	public static final String MSG_TYPE_INFO = "INFO";
 
 	public static final String MSG_SPLIT_CHAR = ";";
 
@@ -61,5 +59,4 @@ public class MessageVO implements Serializable{
 		return "MessageVO [senderId=" + senderId + ", type=" + type + ", roomId=" + roomId + ", data=" + data
 				+ ", object=" + object + "]";
 	}
-
 }

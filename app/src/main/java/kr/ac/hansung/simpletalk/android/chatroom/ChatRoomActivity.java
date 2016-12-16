@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -55,13 +56,14 @@ import kr.ac.hansung.simpletalk.transformVO.UserProfileVO;
 public class ChatRoomActivity extends AppCompatActivity {
     private static final int PICK_FROM_CAMERA = 1;
     private static final int PICK_FROM_GALLERY = 2;
+    private static final int PICK_FROM_EMOTICON = 3;
 
     private Integer chatRoomId;
     private ChatService chatService;
     private ChatArrayAdapter chatArrayAdapter;
     private ChatRoomClientVO chatRoomData;
     private ImageButton buttonSend;
-    private Button imageSend;
+    private ImageButton otherSend;
     private EmojiEditText chatText;
     private EmojiPopup emojiPopup;
     private ImageButton emoticonSend;
@@ -75,7 +77,8 @@ public class ChatRoomActivity extends AppCompatActivity {
                             (MessageVO.MSG_TYPE_IMAGE.equals(msgData.getType()) ||
                             MessageVO.MSG_TYPE_TEXT.equals(msgData.getType()) ||
                             MessageVO.MSG_TYPE_ADD_CHATROOM_USER.equals(msgData.getType()) ||
-                            MessageVO.MSG_TYPE_EXIT_CHATROOM_USER.equals(msgData.getType()))) {
+                            MessageVO.MSG_TYPE_EXIT_CHATROOM_USER.equals(msgData.getType())) ||
+                            MessageVO.MSG_TYPE_EMOTICON.equals(msgData.getType())) {
                 if(msgData.getRoomId() != null && chatRoomId.equals(msgData.getRoomId())) {
                     chatArrayAdapter.add(chatMassgeConverter(msgData));
                 }
@@ -107,7 +110,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         /* UI 영역 */
         rootView = (ViewGroup) findViewById(R.id.activity_chat_room);
         chatText = (EmojiEditText) findViewById(R.id.chatText);
-        imageSend = (Button)findViewById(R.id.imageSend);
+        otherSend = (ImageButton)findViewById(R.id.otherSend);
         emoticonSend = (ImageButton) findViewById(R.id.emoticonSend);
         buttonSend = (ImageButton) findViewById(R.id.buttonSend);
 
@@ -132,25 +135,10 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
         });
 
-        imageSend.setOnClickListener(new View.OnClickListener() {
+        otherSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                // Gallery 호출
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                // 잘라내기 셋팅
-                intent.putExtra("crop", "true");
-                intent.putExtra("aspectX", 0);
-                intent.putExtra("aspectY", 0);
-                intent.putExtra("outputX", 200);
-                intent.putExtra("outputY", 150);
-                try {
-                    intent.putExtra("return-data", true);
-                    startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_GALLERY);
-                } catch (ActivityNotFoundException e) {
-                    // Do nothing for now
-                }
+                DialogSelectOption();
             }
         });
 
@@ -249,6 +237,68 @@ public class ChatRoomActivity extends AppCompatActivity {
         return false;
     }
 
+    private void DialogSelectOption() {
+        final String items[] = { "사진", "카메라", "주사위", "이모티콘" };
+
+        final android.app.AlertDialog.Builder ab = new android.app.AlertDialog.Builder(this);
+        ab.setTitle("Contents");
+        ab.setSingleChoiceItems(items,-1,new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                switch (i){
+                    case 0:
+                        /* 이미지 선택 */
+                        Intent intent = new Intent();
+                        // Gallery 호출
+                        intent.setType("image/*");
+                        intent.setAction(Intent.ACTION_GET_CONTENT);
+                        try {
+                            intent.putExtra("return-data", true);
+                            startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_GALLERY);
+                        } catch (ActivityNotFoundException e) { }
+                        break;
+                    case 1:
+                         /* 카메라 촬영 */
+                        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString());
+                        cameraIntent.putExtra("return-data", true);
+
+                        try {
+                            startActivityForResult(Intent.createChooser(cameraIntent, "Complete action using"), PICK_FROM_CAMERA);
+                        } catch (ActivityNotFoundException e) { }
+                        break;
+                    case 2:
+                        /* 주사위 게임 */
+                        dice();
+                        break;
+                    case 3:
+                        /* 이모티콘 선택 */
+                        Intent intent1 = new Intent(getBaseContext(), Emoticon.class);
+                        // 이모티콘 선택 엑티비티 호출
+                        try {
+                            intent1.putExtra("return-data", true);
+                            startActivityForResult(Intent.createChooser(intent1,"Complete action using"), PICK_FROM_EMOTICON);
+                        } catch (ActivityNotFoundException e) {
+                            // Do nothing for now
+                        }
+                        break;
+                }
+                dialogInterface.dismiss();
+            }
+        });
+        ab.show();
+    }
+
+    private void dice(){
+        int[] diceImgList = new int[]{R.drawable.emoji_0031, R.drawable.emoji_0032, R.drawable.emoji_0033, R.drawable.emoji_0034, R.drawable.emoji_0035, R.drawable.emoji_0036};
+        int num;
+        num = (int)(Math.random()*6)+1;
+
+        chatService.sendEmoticonMsg(chatRoomId, Integer.toString(diceImgList[num-1]));
+    }
+
     private void sendMessage(){
         chatService.sendTextMsg(chatRoomId, chatText.getText().toString());
 
@@ -273,6 +323,10 @@ public class ChatRoomActivity extends AppCompatActivity {
             case MessageVO.MSG_TYPE_IMAGE:
                 chatMag = new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()) ? ChatMessage.SIDE_RIGHT : ChatMessage.SIDE_LEFT,
                         ChatMessage.TYPE_IMAGE, msgData.getData(), userName, profileImagePath);
+                break;
+            case MessageVO.MSG_TYPE_EMOTICON:
+                chatMag = new ChatMessage(chatService.getMyProfile().getId().equals(msgData.getSenderId()) ? ChatMessage.SIDE_RIGHT : ChatMessage.SIDE_LEFT,
+                        ChatMessage.TYPE_EMOTICON, msgData.getData(), userName, profileImagePath);
 
                 //FileSerivce.getInstance().getImageMsg(chatArrayAdapter, chatMag, msgData);
                 break;
@@ -299,7 +353,7 @@ public class ChatRoomActivity extends AppCompatActivity {
             Bundle extras = data.getExtras();
             if (extras != null) {
                 Bitmap photo = extras.getParcelable("data");
-                //imgview.setImageBitmap(photo);
+                FileSerivce.getInstance().sendImageMsg(chatService, chatRoomId, photo);
             }
         }
         if (requestCode == PICK_FROM_GALLERY) {
@@ -307,6 +361,11 @@ public class ChatRoomActivity extends AppCompatActivity {
             if (fileUri != null) {
                 FileSerivce.getInstance().sendImageMsg(this, chatService, chatRoomId, fileUri);
             }
+        }
+
+        if (requestCode == PICK_FROM_EMOTICON) {
+            int fileid = data.getIntExtra("fileid", 0);
+            chatService.sendEmoticonMsg(chatRoomId, Integer.toString(fileid));
         }
     }
 

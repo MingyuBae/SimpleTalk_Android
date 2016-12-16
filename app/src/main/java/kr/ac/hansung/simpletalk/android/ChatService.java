@@ -40,7 +40,7 @@ public class ChatService extends Thread {
                 switch (msgData.getType()) {
                     case MessageVO.MSG_TYPE_TEXT:
                     case MessageVO.MSG_TYPE_IMAGE:
-                        //chatArrayAdapter.add(new ChatMessage(msgData.getSenderId().equals(socketChatThread.getUserProfile().getId()), msgData.toString()));
+                    case MessageVO.MSG_TYPE_EMOTICON:
                         ChatRoomClientVO roomData1 = chatRoomMap.get(msgData.getRoomId());
                         roomData1.addMessageList(msgData);
 
@@ -139,6 +139,22 @@ public class ChatService extends Thread {
             socketChatThread.setHandler(socketHandler);
             socketChatThread.start();
         }
+    }
+
+    public void sendEmoticonMsg(final int chatRoomId, final String fileName){
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                try {
+                    socketChatThread.sendMsg(MessageVO.MSG_TYPE_EMOTICON, myProfile.getId(), chatRoomId, fileName, null);
+                } catch (IOException e) {
+                    Log.w("network", "이모티콘 전송 실패 - 네트워크 오류 (chatRoomId: " + chatRoomId + ", fileName: " + fileName + ")");
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+        return;
     }
 
     public void sendTextMsg(final int chatRoomId, final String sendText){

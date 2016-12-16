@@ -7,6 +7,7 @@ public class ChatMessage {
 
     public static final int TYPE_TEXT = 0;
     public static final int TYPE_IMAGE = 1;
+    public static final int TYPE_EMOTICON = 3;
 
     public String side;
     public int type = TYPE_TEXT;

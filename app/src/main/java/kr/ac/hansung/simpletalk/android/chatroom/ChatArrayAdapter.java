@@ -74,7 +74,12 @@ public class ChatArrayAdapter extends ArrayAdapter<ChatMessage> {
 			fileSerivce.loadImage(this, imageView, chatMessageObj.message);
             imageView.setVisibility(View.VISIBLE);
             chatText.setVisibility(View.GONE);
-        } else {
+        } else if(chatMessageObj.type == ChatMessage.TYPE_EMOTICON){
+            conentView = imageView;
+            imageView.setImageResource(Integer.parseInt(chatMessageObj.message));
+            imageView.setVisibility(View.VISIBLE);
+            chatText.setVisibility(View.GONE);
+		} else {
             conentView = chatText;
             chatText.setText(chatMessageObj.message);
             imageView.setVisibility(View.GONE);
